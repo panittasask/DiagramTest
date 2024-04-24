@@ -1,0 +1,241 @@
+/* @import url('https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'); */
+/* @import "./org-chart-diagram/org-chart-diagram.component.css"; */
+/* @import url('/fusiondiagram/src/fontawesome-pro-6.5.2-web/css/fontawesome.min.css'); */
+/* @import url('/fusiondiagram/src/fontawesome-pro-6.5.2-web/css/all.css'); */
+/* @import "../fontawesome-pro-6.5.2-web/css/fontawesome.min.css"; */
+
+body{
+    font-family:  "Poppins","Notosans" !important;
+}
+h1{
+    text-align: center;
+}
+.navbar ul{
+    list-style-type: none;
+    background-color: rgb(0, 0, 0);
+    padding: 0px;
+    margin: 0;
+    overflow: hidden;
+}
+.navbar a{
+    color: white;
+    text-decoration: none;
+    padding: 15px;
+    display: block;
+    text-align: center;
+}
+.navbar a:hover {
+    background-color: blueviolet;
+}
+.navbar li{
+    float: left;
+}
+
+.dotChartDiagram{
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  position: relative;
+  left: 52%;
+  top: 80%;
+}
+
+/* @import "@fontsource/poppins/400.css"; */
+/* @import "@fontsource/poppins/400-italic.css";  */
+
+/* #diagram {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-width: 10px;
+  border-color: black;
+} */
+/* #diagramcontent{
+    margin-top: 50px !important;
+  } */
+  .control-fluid {
+      padding: 0px !important;
+  }
+  /* .nodeitem{
+      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;   
+      border-radius: 20px;
+      background-color: white;
+      border: solid;
+  } */
+  .searchBox{
+      justify-content: center;
+  
+  }
+  
+  
+  .custom-icon::before {
+      content: '\e701'; /* Unicode character for the desired icon */
+      /* Additional styling if needed */
+    }
+  
+    #searchnode{
+      margin: auto;
+      width: 50%;
+      display: inline;
+    }
+  
+    #searchnode input{
+      margin-right: 10px;
+    }
+
+    .red{
+      height: 25px;
+      width: 25px;
+      background-color: red;
+      border-radius: 50%;
+      position: absolute;
+      left: 56%;
+      top: 12%;
+    }
+    .blue{
+      height: 25px;
+      width: 25px;
+      background-color: rgb(51, 0, 255);
+      border-radius: 50%;
+      position: absolute;
+      left: 56%;
+      top: 12%;
+    }
+    .green{
+      height: 25px;
+      width: 25px;
+      background-color: rgb(44, 255, 79);
+      border-radius: 50%;
+      position: absolute;
+      left: 56%;
+      top: 12%;
+    }
+    .dot{
+        height: 25px;
+        width: 25px;
+        border-radius: 50%;
+        position: absolute;
+        left: 52%;
+        top: 5%;
+      }
+    .e-expand-icon {
+      font-size: 50px; /* Adjust the size as needed */
+  }
+  .e-control { 
+      font-family:  "Poppins","Notosans" !important;
+  } 
+  .e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+    font-family:  "Poppins","Notosans" !important;
+  } 
+  .e-card { 
+    font-family:  "Poppins","Notosans" !important;
+  } 
+  body{
+    font-family:  "Poppins","Notosans" !important;
+  }
+  .collapsible {
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+  }
+  
+  .collapsible-header {
+    background-color: #f1f1f1;
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .collapsible-content {
+    padding: 10px;
+    display: none;
+  }
+  
+  #arrow{
+    margin-left: 2px;
+    display: inline-block;
+    vertical-align: middle
+  }
+
+  /* OrgChart */
+
+  
+/* @import "@fontsource/poppins/400.css"; */
+/* @import "@fontsource/poppins/400-italic.css";  */
+
+/* #diagram {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border-width: 10px;
+  border-color: black;
+} */
+/* #diagramcontent{
+  margin-top: 50px !important;
+} */
+.control-fluid {
+  padding: 0px !important;
+}
+.nodeitem{
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;   
+  border-radius: 20px;
+  color: white;
+  border: solid;
+}
+.searchBox{
+  justify-content: center;
+
+}
+
+
+.custom-icon::before {
+  content: '\e701'; /* Unicode character for the desired icon */
+  /* Additional styling if needed */
+}
+
+#searchnode{
+  margin: auto;
+  width: 50%;
+  display: inline;
+}
+
+#searchnode input{
+  margin-right: 10px;
+}
+.dotChartDiagram{
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  position: relative;
+  left: 52%;
+  top: 80%;
+}
+.e-expand-icon {
+  font-size: 50px; /* Adjust the size as needed */
+}
+.e-control { 
+  font-family:  "Poppins","Notosans" !important;
+} 
+.e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+font-family:  "Poppins","Notosans" !important;
+} 
+.e-card { 
+font-family:  "Poppins","Notosans" !important;
+} 
+body{
+font-family:  "Poppins","Notosans" !important;
+}
+.collapsible {
+border: 1px solid #ccc;
+margin-bottom: 20px;
+}
+
+.collapsible-header {
+background-color: #f1f1f1;
+padding: 10px;
+cursor: pointer;
+}
+
+.collapsible-content {
+padding: 10px;
+display: none;
+}
+
+
+/* Font Awesome */

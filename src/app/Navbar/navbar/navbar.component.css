@@ -1,0 +1,23 @@
+.desktop_menu{
+    margin-top: 24px;
+}
+.desktop_menu ul{
+    padding:0;
+    margin: 0;
+}
+.desktop_menu ul li {
+    list-style-type: none;
+    color: black;
+    display: inline-block;
+    font-size: 18px;
+    margin-left: 20px;
+}
+.desktop_menu ul li:hover {
+    font-weight: bold;
+    cursor: pointer;
+    color: yellow;
+    transition: 0.4s ease-in-out;
+}
+.menu-icon{
+    display: none;
+}

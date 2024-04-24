@@ -1,1 +1,109 @@
-/* You can add global styles to this file, and also import other style files */
+/* @import "./fontawesome-pro-6.5.2-web/css/all.css"; */
+/* @import "./fontawesome-pro-6.5.2-web/css/fontawesome.min.css"; */
+
+@font-face{
+    font-family: 'Notosans';
+    src: url('../src/assets/Noto_Sans_Thai/NotoSansThai-VariableFont_wdth\,wght.ttf');
+}
+@font-face{
+    font-family: 'Poppins';
+    src: url('../src/assets/Poppins-Regular.ttf');
+}
+
+body{
+    font-family:  "Poppins","Notosans" !important;
+}
+/* html, body { height: 100%; } */
+body { margin: 0;  font-family:  "Poppins","Notosans" !important; }
+
+/* @import "@fontsource/poppins/400.css"; */
+/* @import "@fontsource/poppins/400-italic.css";  */
+
+/* #diagram {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-width: 10px;
+    border-color: black;
+  }
+   */
+  .control-fluid {
+      padding: 0px !important;
+  }
+
+    .dot{
+      height: 25px;
+      width: 25px;
+      border-radius: 50%;
+      position: absolute;
+      left: 52%;
+      top: 9%;
+    }
+    .e-expand-icon {
+      font-size: 50px; /* Adjust the size as needed */
+  }
+  .e-control { 
+      font-family:  "Poppins","Notosans" !important;
+  } 
+  .e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+    font-family:  "Poppins","Notosans" !important;
+  } 
+  .e-card { 
+    font-family:  "Poppins","Notosans" !important;
+  } 
+  body{
+    font-family:  "Poppins","Notosans" !important;
+  }
+
+  
+.control-fluid {
+  padding: 0px !important;
+}
+
+
+.custom-icon::before {
+  content: '\e701'; /* Unicode character for the desired icon */
+  /* Additional styling if needed */
+}
+
+#searchnode{
+  margin: auto;
+  width: 50%;
+  display: inline;
+}
+
+#searchnode input{
+  margin-right: 10px;
+}
+.dotChartDiagram{
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  position: relative;
+  left: 52%;
+  top: 80%;
+}
+.e-control { 
+  font-family:  "Poppins","Notosans" !important;
+} 
+.e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+font-family:  "Poppins","Notosans" !important;
+} 
+.e-card { 
+font-family:  "Poppins","Notosans" !important;
+} 
+body{
+font-family:  "Poppins","Notosans" !important;
+}
+
+::-webkit-scrollbar {
+  width: 20px; 
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 6px; /* Rounded corners of the scrollbar thumb */
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f0f0f0; /* Color of the scrollbar track */
+}

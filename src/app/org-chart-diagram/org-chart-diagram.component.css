@@ -1,0 +1,65 @@
+
+/* @import "@fontsource/poppins/400.css"; */
+/* @import "@fontsource/poppins/400-italic.css";  */
+
+#diagram {
+  height: 100%;
+  width: 100%;
+}
+
+.control-fluid {
+    padding: 0px !important;
+}
+
+
+  .dotChartDiagram{
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    position: relative;
+    left: 52%;
+    top: 10px;
+  }
+.e-control { 
+    font-family:  "Poppins","Notosans" !important;
+} 
+.e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+  font-family:  "Poppins","Notosans" !important;
+} 
+.e-card { 
+  font-family:  "Poppins","Notosans" !important;
+} 
+body{
+  font-family:  "Poppins","Notosans" !important;
+}
+
+::-webkit-scrollbar {
+  width: 20px; 
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 6px; /* Rounded corners of the scrollbar thumb */
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f0f0f0; /* Color of the scrollbar track */
+}
+
+.top-half{
+  width: 30px;
+  height: 10px;
+  border-style: dotted;
+  border-width: 2px 2px 2px 2px;
+  border-color: green green transparent green;
+  position: absolute;
+}
+.connectorline{
+  width: 25px;
+  height: 10px;
+  border-style: dotted;
+  border-width: 2px 2px 2px 2px;
+  border-color: #0d3813 transparent transparent transparent;
+  position: absolute;
+  top: 50%;
+}
