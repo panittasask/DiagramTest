@@ -195,7 +195,7 @@ export class CustomerModelComponent implements OnInit {
     //connector.constraints = 0;
     connector.cornerRadius = 8;
     connector.style.fill = '#858383';
-    connector.style.strokeColor = '#858383',
+    connector.style.strokeColor = '#858383';
     connector.style = { strokeWidth: 2, opacity: 1 };
     connector.targetDecorator.shape = 'none';
 
@@ -225,11 +225,12 @@ export class CustomerModelComponent implements OnInit {
       if(x.data.objectType == 'UnitCode'){
         x.height = 300;
       }
+      this.SetDynamicNode();
       this.diagram.dataBind();
       this.diagram.doLayout();
     })
-    
-    this.SetDynamicNode();
+
+
     if(this.diagram.nodes[0].wrapper != undefined){
       this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
     }
@@ -274,7 +275,7 @@ export class CustomerModelComponent implements OnInit {
         let bound = new Rect(200, 400, 500, 400);
         this.diagram.bringIntoView(bound);
   }
- 
+
   public ZoomOut(){
     let ZoomOptions:ZoomOptions={
       type:"ZoomOut",
@@ -343,7 +344,7 @@ export class CustomerModelComponent implements OnInit {
     if(nodeData.length > 0){
         nodeData[0].isExpanded = !condition;
     }
-    
+
   }
 
   public previous() {
@@ -364,16 +365,16 @@ export class CustomerModelComponent implements OnInit {
   ngAfterVIewChecked(){
     this.spinner.hide();
   }
- 
+
   public OrgChart(){
-    
+
   }
   public Export() {
     let options:IExportOptions={};
     options.mode='Download';
     this.diagram.exportDiagram(options);
   }
- 
+
 
   public textTest:string= "";
   public ExportOptions(){
@@ -388,7 +389,7 @@ export class CustomerModelComponent implements OnInit {
     const options = { headers :header};
     const requestData = JSON.stringify({options:htmlData});
     this.http.post(url,requestData,options).subscribe((result:any)=>{
-     
+
 
       this.diagram.exportImage(result.result, {
         fileName: 'diagram',
@@ -421,8 +422,8 @@ export class CustomerModelComponent implements OnInit {
   ExpandAll(){
     this.spinner.show();
     this.diagram.nodes.forEach((x:any)=>{
-      if(x.data.child > 0 && x.data.child != undefined && x.isExpanded == false)  
-       
+      if(x.data.child > 0 && x.data.child != undefined && x.isExpanded == false)
+
         x.isExpanded = true;
     })
     this.spinner.hide();
@@ -445,7 +446,7 @@ export class CustomerModelComponent implements OnInit {
       this.diagram.doLayout();
     }
     console.log("EndingAsync")
-    
+
   }
   public CheckVisible(data:any){
     let findItem = this.isShow.filter((x:any)=>x.name.toUpperCase() == data.toUpperCase());
@@ -456,7 +457,7 @@ export class CustomerModelComponent implements OnInit {
       check = false;
     }
     return check;
-  } 
+  }
   ngOnInit(){
     this.spinner.show();
     for(var i = 0;i<this.orgunit.data.length;i++){
@@ -471,7 +472,7 @@ export class CustomerModelComponent implements OnInit {
         x.visible = true;
       }
     })
-  } 
+  }
 
   public isShow:any=[
     {
@@ -522,8 +523,8 @@ export class CustomerModelComponent implements OnInit {
     {
       name:'BirthDateDisplay',visible:false
     }
-  ] 
-  
+  ]
+
   public async SetDynamicNode(){
     var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
     var Height = AllDisplay.length * 35;

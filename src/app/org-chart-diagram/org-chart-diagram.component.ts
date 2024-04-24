@@ -163,8 +163,8 @@ export class OrgChartDiagramComponent implements OnInit {
   }
   public layout: LayoutModel  = {
     type:'HierarchicalTree',
-    verticalSpacing: 120,
-    enableRouting:false, 
+    verticalSpacing: 200,
+    enableRouting:false,
     enableAnimation:false,
     horizontalSpacing: 90,
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
@@ -231,12 +231,12 @@ export class OrgChartDiagramComponent implements OnInit {
     //   })
     // }
     (async() =>{
-      
+
       for await(let item of this.diagram.nodes){
-        
+
         // item.isExpanded = false;
         // await this.sleep(10);
-        
+
       }
       await this.SetDynamicNode();
         this.height = this.diagram.nodes[0].height ? this.diagram.nodes[0].height : 500;
@@ -316,7 +316,7 @@ export class OrgChartDiagramComponent implements OnInit {
         let bound = new Rect(200, 400, 500, 400);
         this.diagram.bringIntoView(bound);
   }
- 
+
   public ZoomOut(){
     let ZoomOptions:ZoomOptions={
       type:"ZoomOut",
@@ -404,12 +404,12 @@ export class OrgChartDiagramComponent implements OnInit {
     }
   }
 
- 
+
   public OrgChart(){
-    
+
   }
-  
- 
+
+
   public ExportOptions(){
     this.spinner.show();
     let styleSheets = document.styleSheets;
@@ -422,7 +422,7 @@ export class OrgChartDiagramComponent implements OnInit {
     const options = { headers :header};
     const requestData = JSON.stringify({options:htmlData});
     this.http.post(url,requestData,options).subscribe((result:any)=>{
-     
+
       this.diagram.exportImage(result.result, {
         fileName: 'diagram'+dtName.toString(),
         mode: 'Download',
@@ -498,7 +498,7 @@ export class OrgChartDiagramComponent implements OnInit {
       check = false;
     }
     return check;
-  } 
+  }
   public async SetDynamicNode(){
     var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
     var Height = AllDisplay.length * 35;
@@ -539,7 +539,7 @@ export class OrgChartDiagramComponent implements OnInit {
     return Promise.resolve();
   }
 
-  
+
 public isShow:any=[
   {
     name:'PersonNameDisplay',visible:false
@@ -589,5 +589,5 @@ public isShow:any=[
   {
     name:'BirthDateDisplay',visible:false
   }
-] 
+]
 }
