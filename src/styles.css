@@ -41,20 +41,20 @@ body { margin: 0;  font-family:  "Poppins","Notosans" !important; }
     .e-expand-icon {
       font-size: 50px; /* Adjust the size as needed */
   }
-  .e-control { 
+  .e-control {
       font-family:  "Poppins","Notosans" !important;
-  } 
-  .e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+  }
+  .e-tab .e-toolbar-items .e-toolbar-item .e-tab-text {
     font-family:  "Poppins","Notosans" !important;
-  } 
-  .e-card { 
+  }
+  .e-card {
     font-family:  "Poppins","Notosans" !important;
-  } 
+  }
   body{
     font-family:  "Poppins","Notosans" !important;
   }
 
-  
+
 .control-fluid {
   padding: 0px !important;
 }
@@ -64,7 +64,10 @@ body { margin: 0;  font-family:  "Poppins","Notosans" !important; }
   content: '\e701'; /* Unicode character for the desired icon */
   /* Additional styling if needed */
 }
-
+#diagram {
+  height: 100%;
+  width: 100%;
+}
 #searchnode{
   margin: auto;
   width: 50%;
@@ -82,21 +85,21 @@ body { margin: 0;  font-family:  "Poppins","Notosans" !important; }
   left: 52%;
   top: 80%;
 }
-.e-control { 
+.e-control {
   font-family:  "Poppins","Notosans" !important;
-} 
-.e-tab .e-toolbar-items .e-toolbar-item .e-tab-text { 
+}
+.e-tab .e-toolbar-items .e-toolbar-item .e-tab-text {
 font-family:  "Poppins","Notosans" !important;
-} 
-.e-card { 
+}
+.e-card {
 font-family:  "Poppins","Notosans" !important;
-} 
+}
 body{
 font-family:  "Poppins","Notosans" !important;
 }
 
 ::-webkit-scrollbar {
-  width: 20px; 
+  width: 20px;
 }
 
 ::-webkit-scrollbar-thumb {

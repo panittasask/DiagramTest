@@ -1,39 +1,45 @@
-<!-- <div class="control-section diagram-complex-hierarchical-tree" style="align-items: center;justify-content: center;"> -->
-<!-- <div class="col-lg-12 control-section"> -->
-<!-- <div class="content-wrapper"> -->
-
-<div class="container form-group row" style="margin-bottom: 20px;"
-    style="top: 0;position: absolute;justify-content: center;align-items: center;">
-    <div class="col-sm-2">
+<div class="form-group row" style="margin-bottom: 20px;"
+    style="top: 20px;position: static;justify-content: center;align-items: center;">
+    <div class="col-sm-1">
         <input style="margin-left: 15px;" class="btn btn-outline-danger" type="button" id="export" value="export"
             (click)="ExportOptions()" />
     </div>
-    <div class="col-sm-2">
+    <div class="col-sm-1">
         <ng-select [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
             (change)="selectLevel(listLevel)" [searchable]="true">
         </ng-select>
     </div>
-    <div class="col-sm-2">
+    <div class="col-sm-1">
         <input style="margin-left: 15px;" class="btn btn-outline-success" type="button" id="ExpandAll"
             (click)="ExpandAll()" value="ExpandAll" />
     </div>
-    <div class="col-sm-2">
+    <div class="col-sm-1">
         <input style="margin-left: 15px;" class="btn btn-outline-info" type="button" id="CollapsAll"
             (click)="CollapsAll()" value="CollapsAll" />
     </div>
     <div class="col-sm-1">
-        <!-- <h2>Height</h2> -->
         <input class="form-control" type="number" [(ngModel)]="height" (change)="changeHeight()">
     </div>
     <div class="col-sm-1">
-        <!-- <h2>Widht</h2> -->
         <input class="form-control" type="number" [(ngModel)]="width" (change)="changeWidth()">
     </div>
+    <div class="col-sm-6"></div>
 </div>
-<div>
-
+<div style="padding-top: 10px;padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
+  <h2 style="color: white;">{{titleName}}</h2>
+  <h2 style="color: white;">{{titleDesc}}</h2>
 </div>
-<div style="margin-top: 100px;position: static;" >
+<div style="align-content: center;margin-top: 5px;">
+  <div style="display: flex;flex-direction: row-reverse;white-space: nowrap;column-gap: 40px;font-size: 13px;grid-template-columns: auto auto;">
+  <div>
+      <div class="top-half"></div><span style="margin-left: 50px;">Matrix Position</span>
+  </div>
+  <div>
+      <span class="connectorline"></span><span style="margin-left: 50px;">Report to Indirect</span>
+  </div>
+  </div>
+</div>
+<div style="overflow: hidden;position: relative;" >
     <ejs-diagram #diagram id="diagram" width="100%" height="600px" [layout]="layout"
         [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults" [dataSourceSettings]="data"
          (created)="created($event)" [snapSettings]="snapSettings"
@@ -48,7 +54,7 @@
                     border-radius: 20px;width: 100%;
                     color: white;">
                     <div style="display: flex; flex-direction: column;">
-                        <img [src]="data.data.pictureUrl" style="width: 80px; height: 80px; border-radius: 50%; left:50%;transform: translate(-50%, -60%);
+                        <img alt="profile" [src]="data.data.pictureUrl" style="width: 80px; height: 80px; border-radius: 50%; left:50%;transform: translate(-50%, -60%);
                                 position: absolute;" />
                         <span
                             [style.background-color]="data.data.assignType == 'cch_AssignTypePermanent' ? '#7286D3' : data.data.assignType == 'cch_AssignTypeSecondment' ? '#B9F3FC' : data.data.assignType == 'cch_AssignTypeTemporary' ? '#F6995C' : '#E5E0FF'"
@@ -83,7 +89,7 @@
                             <span *ngIf="CheckVisible('companyName')"
                                 style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                     style="text-align: left;">บริษัท :</span><span style="text-align: right;">
-                                    {{data.data.companyName}}</span> </span>
+                                    {{data.data.companyName != null ? data.data.companyName : '-' }}</span> </span>
                             <span *ngIf="CheckVisible('officeName')"
                                 style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                     style="text-align: left;">สถานที่ปฏิบัติการ :</span><span
@@ -164,7 +170,7 @@
                         <div *ngIf="data.data.replacementPersonID != null" class="row" style="margin-top: 20px;height: 100%;">
 
                                 <div class="col-sm-3" >
-                                    <img [src]="data.data.replacementPictureUrl" style="width: 80px; height: 80px; border-radius: 50%;left: 30px;
+                                    <img alt="profile" [src]="data.data.replacementPictureUrl" style="width: 80px; height: 80px; border-radius: 50%;left: 30px;
                                 position: absolute;" />
                                 </div>
                                 <div class="col-sm-9 row">
@@ -269,7 +275,7 @@
                         </div>
                         <div style="justify-content: center;align-items: center;display: flex;">
                             <span
-                                style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;position: absolute;bottom: 40px;margin-top: 20px;align-items: center;flex-direction: row;column-gap: 50%;white-space: nowrap;justify-content: center;width: 20%;">
+                                style="color:rgb(0, 0, 0);font-size: 15px;display: flex;position: absolute;bottom: 40px;margin-top: 20px;align-items: center;flex-direction: row;column-gap: 50%;white-space: nowrap;justify-content: center;width: 20%;">
                                 <span *ngIf="data.data.n0 != null && data.data.n0 != 0" style="width: 20%;"><i
                                         class="fa-duotone fa-users"
                                         style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
@@ -311,25 +317,12 @@
         </ng-template>
     </ejs-diagram>
 
-    <div style="align-content: center;width: 20%;height:20%;margin-left:30px;position: absolute;top: 10%;left: 50px;padding: 10px;background:#f7f7f7;
+    <div style="align-content: center;width: 25%;height:30%;margin-left:10px;position: absolute;top: 10px;background:#f7f7f7
                     ;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;">
-        <ejs-overview id="overview" sourceID="diagram" #overview>
+        <ejs-overview id="overview" width="50%" height="200px" sourceID="diagram" #overview>
         </ejs-overview>
     </div>
 </div>
-<div style="align-content: center;width: 30%;height: 20%;position: absolute;top: 1%;right: 30px;background-color: transparent;z-index: -1;">
-    <div style="display: flex;flex-direction: row;white-space: nowrap;column-gap: 10%;font-size: 13px;grid-template-columns: auto auto;">
-    <div>
-        <div class="top-half"></div><span style="margin-left: 35px;">Matrix Position</span>
-    </div>
-    <div>
-        <span class="connectorline"></span><span style="margin-left: 35px;">Report to Indirect</span>
-    </div>
-    </div>
-</div>
-<!-- </div> -->
-<!-- </div> -->
-<!-- </div> -->
 <ngx-spinner bdColor="rgba(51,51,51,0.8)" size="medium" color="#fff" type="ball-scale-multiple">
     <p style="font-size: 20px; color: white;">Loading...</p>
 </ngx-spinner>

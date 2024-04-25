@@ -58,7 +58,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { TestUnitComponent } from './components/test-unit/test-unit.component';
 @NgModule({
-  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent], 
+  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent],
   imports: [
     AppRoutingModule,RouterLink,RouterOutlet,NgxSpinnerModule,
     RouterModule,
@@ -89,7 +89,7 @@ import { TestUnitComponent } from './components/test-unit/test-unit.component';
     NumericTextBoxModule,
     BrowserModule,
     AccordionModule,
-    FormsModule, 
+    FormsModule,
     ReactiveFormsModule ,
     CommonModule,
     NgSelectModule,
@@ -98,19 +98,6 @@ import { TestUnitComponent } from './components/test-unit/test-unit.component';
   ],
   providers: [
     provideAnimationsAsync(),
-    HierarchicalTreeService,
-    MindMapService,
-    RadialTreeService,
-    ComplexHierarchicalTreeService,
-    DataBindingService,
-    SnappingService,
-    PrintAndExportService,
-    BpmnDiagramsService,
-    SymmetricLayoutService,
-    ConnectorBridgingService,
-    UndoRedoService,
-    DiagramContextMenuService,
-    ConnectorEditingService,
   ],
   bootstrap: [AppComponent]
 })

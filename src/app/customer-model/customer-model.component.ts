@@ -138,6 +138,8 @@ export class CustomerModelComponent implements OnInit {
   public options: IExportOptions;
   public objectData: object;
   public listLevel:number=2;
+  public titleName:any=orgUnit.titleName;
+  public titleDesc:any=orgUnit.titleDesc;
   public data: Object = {
     id: 'objectID',
     parentId: 'parentObjectID',
@@ -155,7 +157,7 @@ export class CustomerModelComponent implements OnInit {
   public layout: LayoutModel  = {
     // type: 'OrganizationalChart',
     type:'HierarchicalTree',
-    connectionDirection:'Orientation',
+    connectionDirection:'Auto',
     enableRouting:false,
     enableAnimation:false,
     // type:'HierarchicalTree',
@@ -178,7 +180,7 @@ export class CustomerModelComponent implements OnInit {
   };
 
   public nodeDefaults(obj: any): NodeModel {
-    obj.constraints = NodeConstraints.Default & ~(  NodeConstraints.Inherit | NodeConstraints.Select);
+    // obj.constraints = NodeConstraints.Default & ~(  NodeConstraints.Inherit | NodeConstraints.Select);
     obj.shape = { type: 'HTML' };
     obj.style = { fill: 'white', strokeColor: 'black', color: 'black' ,CornerRadius:20};
     obj.width = 450;
@@ -190,7 +192,7 @@ export class CustomerModelComponent implements OnInit {
     connector.targetDecorator.height = 20;
     connector.targetDecorator.width = 20;
     connector.type = 'Orthogonal';
-    connector.constraints = ConnectorConstraints.ReadOnly | ConnectorConstraints.LineRouting;
+    // connector.constraints = ConnectorConstraints.ReadOnly | ConnectorConstraints.LineRouting;
     // connector.constraints = ConnectorConstraints.LineRouting;
     //connector.constraints = 0;
     connector.cornerRadius = 8;
@@ -208,11 +210,11 @@ export class CustomerModelComponent implements OnInit {
     let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
     let cd = this.findDuplicate(AllOffset);
     let arrObj:any=[];
-    for(var i = 1 ;i < cd.length +1;i++){
+    for(let i = 1 ;i < cd.length +1;i++){
       arrObj.push({value:i})
     }
     this.levelSearch=[...arrObj];
-    for(var i=0;i<cd.length;i++)
+    for(let i=0;i<cd.length;i++)
     this.diagram.nodes.forEach((x:any)=>{
       if(cd[i] == x.offsetY){
         x.data.levelItem = i+1;
@@ -235,7 +237,7 @@ export class CustomerModelComponent implements OnInit {
       this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
     }
     this.spinner.hide();
-    // this.diagram.dataBind();
+    this.diagram.dataBind();
   }
 
   public selectLevel(args:any){
@@ -328,8 +330,6 @@ export class CustomerModelComponent implements OnInit {
       this.diagram.clearSelection();
       this.currentIndex = (this.currentIndex + 1) % this.matchingNodes.length;
       this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      let bound = new Rect(200, 400, 500, 400);
-      //this.diagram.bringIntoView(bound);
     }
 
   }
@@ -339,11 +339,9 @@ export class CustomerModelComponent implements OnInit {
   }
 
   public Expand(node:any){
-    let nodeData:any = this.diagram.nodes.filter((x:any)=> x.id == node);
-    let condition = nodeData[0].isExpanded;
-    if(nodeData.length > 0){
-        nodeData[0].isExpanded = !condition;
-    }
+    let nodeData:any = this.diagram.nodes.find((x:any)=> x.id == node);
+    nodeData.isExpanded = !nodeData.isExpanded
+    this.diagram.dataBind();
 
   }
 
@@ -354,8 +352,6 @@ export class CustomerModelComponent implements OnInit {
         (this.currentIndex - 1 + this.matchingNodes.length) %
         this.matchingNodes.length;
       this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      //let bound = new Rect(200, 400, 500, 400);
-      //this.diagram.bringIntoView(bound);
     }
   }
 
@@ -366,9 +362,6 @@ export class CustomerModelComponent implements OnInit {
     this.spinner.hide();
   }
 
-  public OrgChart(){
-
-  }
   public Export() {
     let options:IExportOptions={};
     options.mode='Download';
@@ -435,8 +428,7 @@ export class CustomerModelComponent implements OnInit {
     this.spinner.show();
     let finish = false;
     await this.sendItemToCallaps(this.diagram.nodes)
-    console.log("Nope It not")
-    this.spinner.hide();
+
   }
 
   async sendItemToCallaps(item:any):Promise<void>{
@@ -445,8 +437,7 @@ export class CustomerModelComponent implements OnInit {
       this.diagram.dataBind();
       this.diagram.doLayout();
     }
-    console.log("EndingAsync")
-
+    this.spinner.hide();
   }
   public CheckVisible(data:any){
     let findItem = this.isShow.filter((x:any)=>x.name.toUpperCase() == data.toUpperCase());
@@ -460,7 +451,7 @@ export class CustomerModelComponent implements OnInit {
   }
   ngOnInit(){
     this.spinner.show();
-    for(var i = 0;i<this.orgunit.data.length;i++){
+    for(let i = 0;i<this.orgunit.data.length;i++){
       let main:any = this.orgunit.data[i];
       let child:any = this.orgunit.data.filter((x:any)=> x.parentObjectID == main.objectID);
       if(child?.length > 0){
@@ -526,8 +517,9 @@ export class CustomerModelComponent implements OnInit {
   ]
 
   public async SetDynamicNode(){
-    var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
-    var Height = AllDisplay.length * 35;
+    let AllDisplay = this.isShow.filter((x:any) => x.visible == true);
+    let Height = AllDisplay.length * 40;
+    console.log("Height",Height)
     if(this.orgunit.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data.objectType != 'UnitCode'){

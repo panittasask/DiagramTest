@@ -47,6 +47,8 @@ export class TestUnitComponent {
   public height:number = 500;
   public width:number = 450;
   public orgChartData:any=orgChartData;
+  public titleName:any=orgChartData.titleName;
+  public titleDesc:any=orgChartData.titleDesc;
 
   public data: Object = {
     id: 'positionID',
@@ -401,7 +403,7 @@ export class TestUnitComponent {
           this.diagram.dataBind();
         }
         else{
-          r.height = Height * 1.7;
+          r.height = Height * 1.8;
           this.diagram.dataBind();
         }
       })
@@ -411,7 +413,7 @@ export class TestUnitComponent {
         r.height = this.orgChartData.boxHeight;
         this.diagram.dataBind();
         }else{
-          r.height = this.orgChartData.boxHeight * 1.7;
+          r.height = this.orgChartData.boxHeight * 1.8;
           this.diagram.dataBind();
         }
       })

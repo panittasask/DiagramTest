@@ -4,10 +4,12 @@
 <head>
   <meta charset="utf-8">
   <title>Window</title>
-  <link href="//cdn.syncfusion.com/ej2/20.3.47/material.css" rel="stylesheet" />
+  <link  rel='nofollow' href="https://cdn.syncfusion.com/ej2/25.1.35/material.css"   rel="stylesheet"  />
+  <!-- <link href="//cdn.syncfusion.com/ej2/20.3.47/material.css" rel="stylesheet" /> -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link href="https://cdn.jsdelivr.net/gh/eliyantosarage/font-awesome-pro@main/fontawesome-pro-6.5.2-web/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/eliyantosarage/font-awesome-pro@main/fontawesome-pro-6.5.1-web/css/all.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/gh/eliyantosarage/font-awesome-pro@main/fontawesome-pro-6.5.2-web/css/all.min.css" rel="stylesheet"> -->
   <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
   <link href='https://fonts.googleapis.com/css?family=Noto Sans Thai' rel='stylesheet'>
   <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
@@ -19,14 +21,17 @@
 
   <!-- <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css"> -->
 </head>
-
+<body class="ej2-new">
 <div class="container">
-  <ng-select [items]="levelSearch" bindLabel="text" placeholder="Select Layout" style="position: absolute;top: 0;width: 200px;margin-right: 50px;right: 0;"
+  <ng-select [items]="levelSearch" bindLabel="text" placeholder="Select Layout" style="position: absolute;top: 20px;width: 200px;margin-right: 50px;right: 0;"
       [(ngModel)]="listLevel" (change)="selectLayout(listLevel)" [searchable]="true">
   </ng-select>
 </div>
+<div style="padding: 20px 20px;">
   <router-outlet></router-outlet>
-<!-- <body class="ej2-new">
+</div>
+</body>
+<!-- <body >
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WLQL39J" height="0" width="0"
       style="display:none;visibility:hidden"></iframe></noscript>
   <div hidden id="sync-analytics" data-queue="EJ2 - Angular - Demos"></div>

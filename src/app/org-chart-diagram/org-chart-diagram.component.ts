@@ -148,6 +148,8 @@ export class OrgChartDiagramComponent implements OnInit {
   public height:number = 500;
   public width:number = 450;
   public orgChartData:any=orgChartData;
+  public titleName:any=orgChartData.titleName;
+  public titleDesc:any=orgChartData.titleDesc;
 
   public data: Object = {
     id: 'positionID',
@@ -383,7 +385,6 @@ export class OrgChartDiagramComponent implements OnInit {
     let nodeData:any = this.diagram.nodes.find((x:any)=> x.id == node);
     this.spinner.show();
     nodeData.isExpanded = !nodeData.isExpanded;
-    console.log("Node",nodeData.isExpanded)
     this.diagram.dataBind();
     if(this.diagram.nodes[0].wrapper != undefined){
       //this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
