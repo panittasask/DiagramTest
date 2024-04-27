@@ -16,19 +16,19 @@ export class AppComponent {
    {
     value:1,text:"Minimal Layout"
    },
-  //  {
-  //   value:2,text:"BoxColor Layout"
-  //  },
+   {
+    value:2,text:"Position Chart"
+   },
    {
     value:3,text:"Org Chart"
    },
    {
     value:4,text:"Org Unit"
-   },
+   }
   ];
 
   constructor(private router:Router){
-    
+
   }
 
 
@@ -40,7 +40,7 @@ export class AppComponent {
         break;
       }
       case 2:{
-        this.router.navigate(['/test']);
+        this.router.navigate(['/Position']);
         break;
       }
       case 3:{
@@ -52,7 +52,7 @@ export class AppComponent {
         break;
       }
     }
-   
+
     console.log("OutLet",this.outer.component)
   }
   refresh():void{

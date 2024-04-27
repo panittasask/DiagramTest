@@ -111,3 +111,20 @@ body{
   padding: 10px;
   display: none;
 }
+.top-half{
+  width: 30px;
+  height: 15px;
+  border-style: dotted;
+  border-width: 3px 3px 0 3px;
+  border-color: green green transparent green;
+  position: absolute;
+}
+.connectorline{
+  width: 40px;
+  margin-top: 8px;
+  height: 0;
+  border-style: dotted;
+  border-width: 3px 0 0 0;
+  border-color: green transparent transparent transparent;
+  position: absolute;
+}

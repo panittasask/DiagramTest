@@ -29,17 +29,27 @@
   <h2 style="color: white;">{{titleName}}</h2>
   <h2 style="color: white;">{{titleDesc}}</h2>
 </div>
+<div style="align-content: center;margin-top: 5px;">
+  <div style="display: flex;flex-direction: row-reverse;white-space: nowrap;column-gap: 40px;font-size: 13px;grid-template-columns: auto auto;">
+  <div>
+      <div class="top-half"></div><span style="margin-left: 50px;">Matrix Position</span>
+  </div>
+  <div>
+      <span class="connectorline"></span><span style="margin-left: 50px;">Report to Indirect</span>
+  </div>
+  </div>
+</div>
 <div style="margin-top:10px;position: relative;" >
   <ejs-diagram #diagram id="diagram" width="100%" height="600px" [layout]="layout"
-      [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults" [dataSourceSettings]="data"
+      [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults" [dataSourceSettings]="data" [pageSettings]="pageSettings" (wheel)="onWheel($event)"
        (created)="created($event)" [snapSettings]="snapSettings"
       >
       <ng-template #nodeTemplate let-data>
           <!-- {{findingDataVisible(data.data.positionID)}} -->
           <ng-container>
               <div class="nodeitem" id="nodeitem" #nodeItem
-                  [style.border]="data.data.objectType == 'MatrixPos' ? 'inset 4px' : 'solid'"
-                  [style.border-color]="data.data.objectType == 'MatrixPos' ? 'black' : 'white'"
+                  [style.border]="data.data.objectType == 'MatrixPos' ? 'dashed 4px' : 'solid'"
+                  [style.border-color]="data.data.objectType == 'MatrixPos' ? '#A8A8A8' : 'white'"
                   style="align-items: center; justify-content: center;background-color: white;height: 100%;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
                   border-radius: 20px;width: 100%;
                   color: white;">

@@ -4,7 +4,7 @@ import { AccumulationChartModule } from '@syncfusion/ej2-angular-charts';
 
 import { AccumulationAnnotationService, AccumulationDataLabelService, AccumulationLegendService, AccumulationTooltipService, ChartAllModule } from '@syncfusion/ej2-angular-charts';
 
-import { DiagramAllModule, SymbolPaletteAllModule, OverviewAllModule, HierarchicalTreeService, MindMapService, RadialTreeService, ComplexHierarchicalTreeService, DataBindingService, SnappingService, PrintAndExportService, BpmnDiagramsService, SymmetricLayoutService, ConnectorBridgingService, UndoRedoService, DiagramContextMenuService, ConnectorEditingService, LayoutAnimationService } from '@syncfusion/ej2-angular-diagrams';
+import { LayoutAnimation,DiagramModule,DiagramAllModule, SymbolPaletteAllModule, OverviewAllModule, HierarchicalTreeService, MindMapService, RadialTreeService, ComplexHierarchicalTreeService, DataBindingService, SnappingService, PrintAndExportService, BpmnDiagramsService, SymmetricLayoutService, ConnectorBridgingService, UndoRedoService, DiagramContextMenuService, ConnectorEditingService, LayoutAnimationService } from '@syncfusion/ej2-angular-diagrams';
 
 import { GridAllModule } from '@syncfusion/ej2-angular-grids';
 
@@ -57,15 +57,16 @@ import { OrgChartDiagramComponent } from './org-chart-diagram/org-chart-diagram.
 import { AppRoutingModule } from './app-routing.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { TestUnitComponent } from './components/test-unit/test-unit.component';
+import { OrgPositionComponent } from './components/org-position/org-position.component';
 @NgModule({
-  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent],
+  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent, OrgPositionComponent],
   imports: [
     AppRoutingModule,RouterLink,RouterOutlet,NgxSpinnerModule,
     RouterModule,
     MatProgressSpinnerModule,
     FontAwesomeModule,
     NgbModule,
-    DiagramAllModule,
+    DiagramAllModule,DiagramModule,
     ChartAllModule,
     GridAllModule,
     SymbolPaletteAllModule,
@@ -98,6 +99,19 @@ import { TestUnitComponent } from './components/test-unit/test-unit.component';
   ],
   providers: [
     provideAnimationsAsync(),
+    HierarchicalTreeService,
+    MindMapService,
+    RadialTreeService,
+    ComplexHierarchicalTreeService,
+    DataBindingService,
+    SnappingService,
+    PrintAndExportService,
+    BpmnDiagramsService,
+    SymmetricLayoutService,
+    ConnectorBridgingService,
+    UndoRedoService,
+    DiagramContextMenuService,
+    ConnectorEditingService,
   ],
   bootstrap: [AppComponent]
 })

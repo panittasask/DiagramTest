@@ -85,6 +85,8 @@ import { threadId } from 'worker_threads';
 import { bottom, left, right } from '@popperjs/core';
 import { NgxSpinner, NgxSpinnerService,NgxSpinnerModule } from 'ngx-spinner';
 import { rejects } from 'assert';
+import { error } from 'console';
+import { ConnectableObservable } from 'rxjs';
 
 Diagram.Inject(
   DataBinding,
@@ -115,9 +117,10 @@ export interface MyObject {
   encapsulation: ViewEncapsulation.None,
 })
 export class CustomerModelComponent implements OnInit {
-  @ViewChild('diagram')
+  @ViewChild('diagram',{static:true})
   //@ViewChild('overview') el:ElementRef<HTMLImageElement>
   public diagram: DiagramComponent;
+  @ViewChild('nodeTemplate',{static:false,read:ElementRef}) public nodeTemplate:ElementRef;
   constructor(private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService){}
   @ViewChild('overview') public overview:Overview;
   public connectors: ConnectorModel;
@@ -130,7 +133,7 @@ export class CustomerModelComponent implements OnInit {
   public orgunit:any = orgUnit;
   public isChild: boolean = false;
   public snapSettings: SnapSettingsModel = {
-    constraints: SnapConstraints.None
+    // constraints: SnapConstraints.None
   };
   public levelSearch:any =[];
   public visible: boolean = false;
@@ -155,32 +158,24 @@ export class CustomerModelComponent implements OnInit {
   public tool: DiagramTools = DiagramTools.ZoomPan;
 
   public layout: LayoutModel  = {
-    // type: 'OrganizationalChart',
     type:'HierarchicalTree',
     connectionDirection:'Auto',
-    enableRouting:false,
+    enableRouting:true,
     enableAnimation:false,
-    // type:'HierarchicalTree',
-    //margin: { left: 10, right: 10, top: 10, bottom: 0 },
-    // margin:{ left: 100, top: 100, right: 100, bottom: 500 },
     verticalSpacing: 120,
     horizontalSpacing: 90,
-    arrangement:ChildArrangement.Nonlinear,
-    horizontalAlignment: "Left", verticalAlignment: "Top",
-    //bounds:new Rect(0,0,400,600),
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
-    // orientation:'TopToBottom',
-    // enableAnimation: true,
     getLayoutInfo: (node: Node, options: TreeInfo) => {
-      // options.enableRouting = true;
       if (!options.hasSubTree) {
-        options.type = 'Right';
+        options.type = 'Balanced';
+          options.orientation = 'Horizontal';
       }
     },
   };
 
   public nodeDefaults(obj: any): NodeModel {
     // obj.constraints = NodeConstraints.Default & ~(  NodeConstraints.Inherit | NodeConstraints.Select);
+    // obj.constraints = NodeConstraints.InConnect;
     obj.shape = { type: 'HTML' };
     obj.style = { fill: 'white', strokeColor: 'black', color: 'black' ,CornerRadius:20};
     obj.width = 450;
@@ -189,8 +184,8 @@ export class CustomerModelComponent implements OnInit {
   }
   public connDefaults(
     connector: any, diagram: Diagram): ConnectorModel {
-    connector.targetDecorator.height = 20;
-    connector.targetDecorator.width = 20;
+    // connector.targetDecorator.height = 120;
+    // connector.targetDecorator.width = 120;
     connector.type = 'Orthogonal';
     // connector.constraints = ConnectorConstraints.ReadOnly | ConnectorConstraints.LineRouting;
     // connector.constraints = ConnectorConstraints.LineRouting;
@@ -206,6 +201,7 @@ export class CustomerModelComponent implements OnInit {
 
   public created(args:Object): void {
     // console.log("Diagram",this.diagram.nodes)
+    let vm = this;
     this.spinner.show();
     let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
     let cd = this.findDuplicate(AllOffset);
@@ -228,15 +224,53 @@ export class CustomerModelComponent implements OnInit {
         x.height = 300;
       }
       this.SetDynamicNode();
+      this.diagram.zoom(0.2);
       this.diagram.dataBind();
       this.diagram.doLayout();
     })
+    vm.spinner.hide();
+    this.diagram.dataBind();
+    //this.addTitle();
+    this.diagram.dataBind();
 
 
-    if(this.diagram.nodes[0].wrapper != undefined){
-      this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
+  }
+
+  addTitle(){
+    let titleName = this.titleName;
+    let titleDesc = this.titleDesc;
+    let node:NodeModel = {
+      id:'title',
+      offsetX:0,
+      offsetY:-1500,
+      style:{
+        fill:'black',
+        strokeColor:'green',
+      },
+      shape:{
+        type:'HTML',
+        content:`<div style="padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100%;width:100%;align-items: center;text-align: center;vertical-align: center;"><h2 style="color: white;font-size:100px;margin-top:100px">${titleName}</h2><h2 style="color: white;font-size:100px;margin-top:150px">${titleDesc}</h2></div>`
+      }
     }
-    this.spinner.hide();
+    this.diagram.add(node);
+    let nodetitle:any = this.diagram.nodes.find((x:any)=> x.id == 'title')
+    let width:any = document.getElementById('diagram')?.offsetWidth;
+    nodetitle.width = width*17;
+    nodetitle.height = 700;
+  }
+
+
+
+
+  onWheel(event:any){
+    let Zoom:ZoomOptions;
+    event.preventDefault();
+    if(event.wheelDelta > 0){
+      Zoom = { type:'ZoomIn',zoomFactor:0.1};
+    }else{
+      Zoom = { type:'ZoomOut',zoomFactor:0.1};
+    }
+    this.diagram.zoomTo(Zoom)
     this.diagram.dataBind();
   }
 
@@ -355,24 +389,16 @@ export class CustomerModelComponent implements OnInit {
     }
   }
 
-  ngAfterViewInit() {
-    this.spinner.hide();
-  }
-  ngAfterVIewChecked(){
-    this.spinner.hide();
-  }
 
-  public Export() {
-    let options:IExportOptions={};
-    options.mode='Download';
-    this.diagram.exportDiagram(options);
-  }
-
-
+public diagramthing(){
+  this.diagram.dataBind();
+  this.diagram.doLayout();
+}
   public textTest:string= "";
   public ExportOptions(){
     //this.diagram.fitToPage();
     this.spinner.show();
+    this.addTitle();
     let stylesheet = document.styleSheets;
     let htmlData:string = this.diagram.getDiagramContent(stylesheet);
     const url = 'https://localhost:44301/home/generatedocument';
@@ -381,36 +407,46 @@ export class CustomerModelComponent implements OnInit {
     });
     const options = { headers :header};
     const requestData = JSON.stringify({options:htmlData});
-    this.http.post(url,requestData,options).subscribe((result:any)=>{
+    this.http.post(url,requestData,options).subscribe({
+       next:(response:any)=>{
+        this.diagram.exportImage(response.result, {
+          fileName: 'diagram',
+          mode: 'Download',
+          region: 'PageSettings',
+          // margin:{left:+200,right:+200,top:+200,bottom:+200},
+          pageHeight:1000,
+          pageWidth:1000,
+          stretch: 'Meet',
+        })
+        this.spinner.hide();
+      },
+      error:(error:any)=>{
+        this.spinner.hide();
+        //this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'title'))
+        this.diagramthing();
+        console.log("Error Is >>>",error);
+      },
+      complete:() =>{
+        console.log("IS THIS COMPLETE?")
+        //this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'title'))
+        this.diagramthing();
+        this.spinner.hide();
+      }
+    })
+    // this.http.post(url,requestData,options).subscribe((result:any)=>{
 
-
-      this.diagram.exportImage(result.result, {
-        fileName: 'diagram',
-        mode: 'Download',
-        region: 'Content',
-        stretch: 'Stretch',
-      });
-      // const source = result.result;
-      // const download = document.createElement("a");
-      // download.href = source;
-      // download.download = 'Diagram.pdf';
-      // download.click();
-
-      this.spinner.hide();
-      // this.diagram.exportImage(this.textTest, {
-      //   fileName: 'diagram',
-      //   mode: 'Download',
-      // });
-    },
-    (error:any) =>{
-      console.log("Error",error)
-      this.spinner.hide();
-    }
-  );
+    //   this.diagram.exportImage(result.result, {
+    //     fileName: 'diagram',
+    //     mode: 'Download',
+    //     region: 'Content',
+    //     stretch: 'Stretch',
+    //   })
+    //   this.spinner.hide();
+    // }
   }
-  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity',padding :{left:50,right:50,top:50,bottom:50}};
+  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Diagram',padding:{top:150,bottom:150,left:150,right:150}};
   public pageSettings:PageSettingsModel ={
-    showPageBreaks:true,margin:{left:-100,right:-100,top:-100,bottom:-100}
+    showPageBreaks:true,margin:{top:0,left:0,right:0,bottom:-100}
   }
   ExpandAll(){
     this.spinner.show();
@@ -519,7 +555,6 @@ export class CustomerModelComponent implements OnInit {
   public async SetDynamicNode(){
     let AllDisplay = this.isShow.filter((x:any) => x.visible == true);
     let Height = AllDisplay.length * 40;
-    console.log("Height",Height)
     if(this.orgunit.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data.objectType != 'UnitCode'){

@@ -6,10 +6,10 @@ import dataJsonUsing from '../../customer-model/Chart.json';
 import chart60node from '../../customer-model/Chart60Node.json';
 import orgUnit from '../../customer-model/OrgUnit.json';
 import orgChartData from '../../../model/P_Tee3.json';
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core';
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
 import { DataManager } from '@syncfusion/ej2-data';
-import { AnnotationConstraints, ChildArrangement, ConnectionPointOrigin, ConnectorConstraints, Diagram, DiagramComponent, DiagramConstraints, DiagramTools, IExportOptions, LayoutModel, NodeConstraints, NodeModel, Overview, PageSettingsModel, Rect, ScrollSettingsModel, Shape, SnapConstraints, SnapSettingsModel, TreeInfo } from '@syncfusion/ej2-angular-diagrams';
+import { AnnotationConstraints, ChildArrangement, ConnectionPointOrigin, ConnectorConstraints, Diagram, DiagramComponent, DiagramConstraints, DiagramTools, IExportOptions, LayoutModel, NodeConstraints, NodeModel, Overview, PageSettingsModel, Rect, ScrollSettingsModel, Shape, SnapConstraints, SnapSettingsModel, TreeInfo, ZoomOptions } from '@syncfusion/ej2-angular-diagrams';
 import dataUnit from '../../customer-model/Chart60Node.json';
 import { ConnectorModel, Margin } from '@syncfusion/ej2-angular-charts';
 import { opacity } from 'html2canvas/dist/types/css/property-descriptors/opacity';
@@ -22,7 +22,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
   styleUrl: './test-unit.component.css'
 })
 export class TestUnitComponent {
-  @ViewChild('diagram')
+  @ViewChild('diagram',{static:true})
   //@ViewChild('overview') el:ElementRef<HTMLImageElement>
   public diagram: DiagramComponent;
   @ViewChild('nodeItem',{static:true}) public nodeItem:any;
@@ -58,19 +58,17 @@ export class TestUnitComponent {
     }
   };
 
-  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity',padding :{left:50,right:50,top:50,bottom:50}};
+  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity'};
   public pageSettings:PageSettingsModel ={
-    showPageBreaks:true,margin:{left:-50,right:-50,top:-50,bottom:-50}
+    showPageBreaks:true,margin:{left:-200,right:-200,top:-200,bottom:-200}
   }
   public layout: LayoutModel  = {
     type:'HierarchicalTree',
+    connectionDirection:'Auto',
     verticalSpacing: 200,
-    connectionDirection:'Orientation',
-    enableRouting:false,
+    enableRouting:true,
     enableAnimation:false,
     horizontalSpacing: 90,
-    arrangement:ChildArrangement.Nonlinear,
-    horizontalAlignment: "Left", verticalAlignment: "Top",
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
     getLayoutInfo: (node: Node, options: TreeInfo,) => {
       if (!options.hasSubTree) {
@@ -81,7 +79,6 @@ export class TestUnitComponent {
   };
 
   public nodeDefaults(obj: any): NodeModel {
-    obj.constraints = NodeConstraints.Default & ~( NodeConstraints.Select | NodeConstraints.Inherit | NodeConstraints.Expandable);
     obj.shape = { type: 'HTML' };
     obj.offsetX = 100;
     obj.offsetY = 100;
@@ -115,23 +112,23 @@ export class TestUnitComponent {
 
   public created(args:Object): void {
     this.spinner.show();
-    this.diagram.constraints = DiagramConstraints.Default & ~DiagramConstraints.PageEditable;
+    this.diagram.constraints = DiagramConstraints.Default ;
     this.diagram.scrollSettings = { scrollLimit: 'Infinity' };
     this.diagram.tool = DiagramTools.ZoomPan;
-    // let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
-    // let cd = this.findDuplicate(AllOffset);
-    // let arrObj:any=[];
-    // for(var i = 1 ;i < cd.length +1;i++){
-    //   arrObj.push({value:i})
-    // }
-    // this.levelSearch=[...arrObj];
-    // for(var i=0;i<cd.length;i++){
-    //   this.diagram.nodes.forEach((x:any)=>{
-    //     if(cd[i] == x.offsetY){
-    //       x.data.levelItem = i+1;
-    //     }
-    //   })
-    // }
+    let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
+    let cd = this.findDuplicate(AllOffset);
+    let arrObj:any=[];
+    for(var i = 1 ;i < cd.length +1;i++){
+      arrObj.push({value:i})
+    }
+    this.levelSearch=[...arrObj];
+    for(var i=0;i<cd.length;i++){
+      this.diagram.nodes.forEach((x:any)=>{
+        if(cd[i] == x.offsetY){
+          x.data.levelItem = i+1;
+        }
+      })
+    }
     (async() =>{
 
       for await(let item of this.diagram.nodes){
@@ -148,8 +145,8 @@ export class TestUnitComponent {
       if(this.diagram.nodes[0].wrapper != undefined){
         this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
       }
-      this.spinner.hide();
     })();
+    this.selectLevel({value:2})
     if(this.diagram.nodes[0].wrapper != undefined){
       this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
     }
@@ -158,20 +155,29 @@ export class TestUnitComponent {
     //   this.diagram.dataBind();
     // }
     //this.diagram.doLayout();
+    let zoomoptions:ZoomOptions ={
+      type:'ZoomOut',
+      zoomFactor:1.2
+    }
+    this.diagram.zoom(0.2);
     this.spinner.hide();
     this.diagram.dataBind();
   }
 
   public selectLevel(args:any){
+    this.spinner.show();
     if(args != null){
       this.diagram.nodes.forEach((x:any)=>{
-        if(x.data.levelItem >= args.value){
-          if(x.isExpanded == true)
+        if(x.data.levelItem < args.value){
+          x.isExpanded = true;
+        }else{
           x.isExpanded = false;
         }
+        this.diagram.dataBind();
       })
-      this.diagram.dataBind();
+
     }
+    this.spinner.hide();
   }
   public changeHeight(){
     this.spinner.show;
@@ -277,11 +283,11 @@ export class TestUnitComponent {
     let nodeData:any = this.diagram.nodes.find((x:any)=> x.id == node);
     this.spinner.show();
     nodeData.isExpanded = !nodeData.isExpanded;
-    console.log("Node",nodeData.isExpanded)
     this.diagram.dataBind();
     if(this.diagram.nodes[0].wrapper != undefined){
       //this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
     }
+    // this.diagram.fitToPage();
       this.spinner.hide();
     // this.diagram.refresh();
   }
@@ -322,7 +328,7 @@ export class TestUnitComponent {
         mode: 'Download',
         region: 'Content',
         margin : { left: 100, right: 100, top: 10, bottom: 10 },
-        stretch: 'Stretch',
+        stretch: 'Meet',
         format:'PNG',
       });
       this.spinner.hide();
@@ -381,8 +387,20 @@ export class TestUnitComponent {
         x.visible = true;
       }
     })
-
   }
+
+  onWheel(event:any){
+    let Zoom:ZoomOptions;
+    event.preventDefault();
+    if(event.wheelDelta > 0){
+      Zoom = { type:'ZoomIn',zoomFactor:0.1};
+    }else{
+      Zoom = { type:'ZoomOut',zoomFactor:0.1};
+    }
+    this.diagram.zoomTo(Zoom)
+    this.diagram.dataBind();
+  }
+
   public CheckVisible(data:any){
     let findItem = this.isShow.filter((x:any)=>x.name.toUpperCase() == data.toUpperCase());
     let check = false;

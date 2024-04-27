@@ -76,7 +76,7 @@ import { ExpandMode } from '@syncfusion/ej2-navigations';
 import ModelData from '..//customer-model/MogData';
 import { connect } from 'http2';
 import { wrap } from 'module';
-import { ControlPoints, CornerRadius, IExportEventArgs, colorNameToHex } from '@syncfusion/ej2-angular-charts';
+import { ControlPoints, CornerRadius, IExportEventArgs, Margin, colorNameToHex } from '@syncfusion/ej2-angular-charts';
 import { content, setStyleAndAttributes } from '@syncfusion/ej2-angular-grids';
 import Data from '../customer-model/dataObject';
 import { response } from 'express';
@@ -90,15 +90,16 @@ import { FitOptions } from '@syncfusion/ej2-diagrams/src/diagram/diagram/page-se
 import { parse } from 'path';
 import { promiseHooks } from 'v8';
 import { ConsoleService } from '@ng-select/ng-select/lib/console.service';
+import { notDeepStrictEqual } from 'assert';
 
-// Diagram.Inject(
-//   DataBinding,
-//   ComplexHierarchicalTree,
-//   LineRouting,
-//   LineDistribution,
-//   ConnectorEditing,
-//   HierarchicalTree,
-// );
+Diagram.Inject(
+  DataBinding,
+  ComplexHierarchicalTree,
+  LineRouting,
+  LineDistribution,
+  ConnectorEditing,
+  HierarchicalTree,
+);
 
 export interface EmployeeInfo {
   Role: string;
@@ -158,21 +159,57 @@ export class OrgChartDiagramComponent implements OnInit {
     doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
     }
   };
-
-  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity',padding :{left:50,right:50,top:50,bottom:50}};
+  public addTitle(){
+    let titleName = this.titleName;
+    let titleDesc = this.titleDesc;
+    let width:any = document.getElementById('diagram')?.offsetWidth;
+    let hgeith:any = document.getElementById('diagram')?.offsetHeight;
+    let offsetX = this.diagram.nodes[0].offsetX;
+    let offsetOfDiagram = this.diagram;
+    let widhtData:any =this.diagram.scrollSettings.viewPortWidth;
+    console.log("height",width)
+    let node:NodeModel = {
+      offsetX:(widhtData)*10,
+      offsetY:-500,
+      id:'title',
+      shape:{
+        type:'HTML',
+        content:`<div style="offset-position:top;padding-top:100px;padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100%;width:100%;align-items: center;text-align: center;vertical-align: center;"><h2 style="color: white;font-size:100px;margin-top:100px">${titleName}</h2><h2 style="color: white;font-size:100px;margin-top:150px">${titleDesc}</h2></div>`
+      },
+      // constraints:NodeConstraints.AllowMovingOutsideLane & NodeConstraints.Default
+    }
+    this.diagram.add(node);
+    // let bottomnode:NodeModel = {
+    //   offsetX:(width*19)/2.2,
+    //   offsetY:hgeith+5000,
+    //   id:'bottomNode',
+    //   shape:{type:'Basic',shape:'Rectangle'},
+    //   style:{fill:'#8ACDD7'}
+    // }
+    // this.diagram.add(bottomnode);
+    let nodetitle:any = this.diagram.nodes.find((x:any)=> x.id == 'title')
+    // let width:any = document.getElementById('diagram')?.offsetWidth;
+    nodetitle.width = width*20;
+    nodetitle.height = 700;
+    // this.diagramthing();
+  }
+  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Diagram',padding :{left:50,right:50,top:50,bottom:50}};
   public pageSettings:PageSettingsModel ={
-    showPageBreaks:true,margin:{left:-50,right:-50,top:-50,bottom:-50}
+    showPageBreaks:true
   }
   public layout: LayoutModel  = {
     type:'HierarchicalTree',
-    verticalSpacing: 200,
-    enableRouting:false,
+    connectionDirection:'Auto',
+    verticalSpacing: 120,
+    enableRouting:true,
     enableAnimation:false,
     horizontalSpacing: 90,
+    horizontalAlignment:'Stretch',
+    verticalAlignment:'Stretch',
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
     getLayoutInfo: (node: Node, options: TreeInfo,) => {
       if (!options.hasSubTree) {
-        options.type = 'Balanced';
+          options.type = 'Balanced';
           options.orientation = 'Horizontal';
       }
     },
@@ -181,8 +218,8 @@ export class OrgChartDiagramComponent implements OnInit {
   public nodeDefaults(obj: any): NodeModel {
     // obj.constraints = NodeConstraints.Default & ~( NodeConstraints.Select) ;
     obj.shape = { type: 'HTML' };
-    obj.offsetX = 100;
-    obj.offsetY = 100;
+    // obj.offsetX = 100;
+    // obj.offsetY = 100;
     obj.height = 500;
     return obj;
   }
@@ -212,68 +249,99 @@ export class OrgChartDiagramComponent implements OnInit {
       connector.targetDecorator.shape = 'none';
       return connector;
   }
-
+  public cleanerAfterExport(){
+    this.diagram.remove(this.diagram.nodes.find((x:any)=>x.id == 'title'))
+    // this.diagram.remove(this.diagram.nodes.find((x:any)=>x.id == 'bottomNode'))
+  }
   public created(args:Object): void {
     this.spinner.show();
-    this.diagram.constraints = DiagramConstraints.Default & ~DiagramConstraints.PageEditable;
-    this.diagram.scrollSettings = { scrollLimit: 'Infinity' };
+    this.diagram.constraints = DiagramConstraints.Default & ~DiagramConstraints.PageEditable ;
+    this.diagram.scrollSettings ={scrollLimit:'Infinity'};
+    this.diagram.pageSettings = {showPageBreaks:true};
     this.diagram.tool = DiagramTools.ZoomPan;
-    // let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
-    // let cd = this.findDuplicate(AllOffset);
-    // let arrObj:any=[];
-    // for(var i = 1 ;i < cd.length +1;i++){
-    //   arrObj.push({value:i})
-    // }
-    // this.levelSearch=[...arrObj];
-    // for(var i=0;i<cd.length;i++){
-    //   this.diagram.nodes.forEach((x:any)=>{
-    //     if(cd[i] == x.offsetY){
-    //       x.data.levelItem = i+1;
-    //     }
-    //   })
-    // }
-    (async() =>{
+    let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
+    let offsetX = this.diagram.nodes.map((x:any)=>x.offsetX)
+    let xcd = this.findDuplicate(offsetX);
+    let cd = this.findDuplicate(AllOffset);
+    let arrObj:any=[];
+    for(let i = 1 ;i < cd.length +1;i++){
+      arrObj.push({value:i})
+    }
+    this.levelSearch=[...arrObj];
+    for(let i=0;i<cd.length;i++){
+      this.diagram.nodes.forEach((x:any)=>{
+        if(cd[i] == x.offsetY){
+          x.data.levelItem = i+1;
+        }
+      })
+    }
+    xcd = xcd.sort();
+    for(let i=0;i<xcd.length;i++){
+        this.diagram.nodes.forEach((x:any)=>{
+          if(xcd[i] == x.offsetX){
+            x.data.sideItem = i+1;
+          }
+      })
+    }
 
-      for await(let item of this.diagram.nodes){
 
-        // item.isExpanded = false;
-        // await this.sleep(10);
-
-      }
-      await this.SetDynamicNode();
+      this.SetDynamicNode();
         this.height = this.diagram.nodes[0].height ? this.diagram.nodes[0].height : 500;
         this.width = this.diagram.nodes[0].width ? this.diagram.nodes[0].width : 450;
       this.diagram.dataBind();
-      this.diagram.doLayout();
+      // this.diagram.doLayout();
       if(this.diagram.nodes[0].wrapper != undefined){
         this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
       }
       this.spinner.hide();
-    })();
     if(this.diagram.nodes[0].wrapper != undefined){
-      this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
     }
-    // this.diagram.nodes.forEach((x:any)=>{
-    //   x.height = h;
-    //   this.diagram.dataBind();
-    // }
-    //this.diagram.doLayout();
-    // this.diagram.fitToPage();
+
+    this.selectLevel({value:2});
+    this.diagram.zoom(0.2);
     this.spinner.hide();
+    this.diagram.dataBind();
+    let sideLevelData = this.diagram.nodes.filter((x:any)=>x.id != 'title').sort((a:any,b:any) => a.data?.sideItem - b.data?.sideItem)
+    let lastOffsetX = this.diagram.nodes[this.diagram.nodes.length - 1];
+    this.lastOffsetX = lastOffsetX.offsetX;
+    this.firstOffsetX = sideLevelData[0].offsetX;
+    console.log("firstOffsetX",this.firstOffsetX)
+    console.log("ViewPort",this.diagram.scrollSettings.viewPortWidth)
+    this.cleanerAfterExport();
+    this.addTitle();
+  }
+
+  onWheel(event:any){
+    let Zoom:ZoomOptions;
+    event.preventDefault();
+    if(event.wheelDelta > 0){
+      Zoom = { type:'ZoomIn',zoomFactor:0.1};
+    }else{
+      Zoom = { type:'ZoomOut',zoomFactor:0.1};
+    }
+    this.diagram.zoomTo(Zoom)
     this.diagram.dataBind();
   }
 
   public selectLevel(args:any){
+    this.cleanerAfterExport();
     if(args != null){
       this.diagram.nodes.forEach((x:any)=>{
-        if(x.data.levelItem >= args.value){
-          if(x.isExpanded == true)
+
+        if(x.data.levelItem < args.value){
+          x.isExpanded = true;
+        }else{
           x.isExpanded = false;
         }
+        // this.diagram.dataBind();
       })
-      this.diagram.dataBind();
+      // this.diagram.dataBind();
     }
+    // this.diagramthing();
+    this.addTitle();
   }
+  public firstOffsetX:any;
+  public lastOffsetX:any;
   public changeHeight(){
     this.spinner.show;
     this.diagram.nodes.forEach((x:any)=>{
@@ -281,7 +349,7 @@ export class OrgChartDiagramComponent implements OnInit {
       this.diagram.dataBind();
     })
     this.spinner.hide();
-    this.diagram.doLayout();
+    // this.diagram.doLayout();
   }
   public changeWidth(){
     this.spinner.show;
@@ -290,7 +358,7 @@ export class OrgChartDiagramComponent implements OnInit {
       this.diagram.dataBind();
     })
     this.spinner.hide();
-    this.diagram.doLayout();
+    // this.diagram.doLayout();
   }
 
   public findDuplicate(data:any){
@@ -382,14 +450,15 @@ export class OrgChartDiagramComponent implements OnInit {
   }
 
   public Expand(node:any){
+    // this.spinner.show();
     let nodeData:any = this.diagram.nodes.find((x:any)=> x.id == node);
-    this.spinner.show();
     nodeData.isExpanded = !nodeData.isExpanded;
-    this.diagram.dataBind();
-    if(this.diagram.nodes[0].wrapper != undefined){
-      //this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
+
+    if(nodeData.wrapper != undefined){
+      this.diagram.bringToCenter(nodeData.wrapper.bounds);
     }
       this.spinner.hide();
+      this.diagramthing()
     // this.diagram.refresh();
   }
 
@@ -409,12 +478,18 @@ export class OrgChartDiagramComponent implements OnInit {
   public OrgChart(){
 
   }
-
+  public diagramthing(){
+    this.diagram.dataBind();
+    // this.diagram.doLayout();
+  }
 
   public ExportOptions(){
     this.spinner.show();
+    // this.addTitle();
     let styleSheets = document.styleSheets;
     let htmlData:string = this.diagram.getDiagramContent(styleSheets);
+    // this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'title'))
+    // this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'bottomNode'))
     const url = 'https://localhost:44301/home/generatedocument';
     const header = new HttpHeaders({
       'Content-type':'application/json'
@@ -426,16 +501,17 @@ export class OrgChartDiagramComponent implements OnInit {
 
       this.diagram.exportImage(result.result, {
         fileName: 'diagram'+dtName.toString(),
+        // margin : { left: 100, right: 100, top: 100, bottom: 100 },
         mode: 'Download',
         region: 'Content',
-        margin : { left: 100, right: 100, top: 10, bottom: 10 },
-        stretch: 'Stretch',
+        pageHeight:5000,
+        stretch: 'None',
         format:'PNG',
       });
+      // this.cleanerAfterExport();
+      // this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'title'))
+      this.diagramthing();
       this.spinner.hide();
-    },
-    (error:any) =>{
-      console.log("Error",error)
     }
   );
   }
@@ -459,7 +535,7 @@ export class OrgChartDiagramComponent implements OnInit {
     if(x.isExpanded == false){
       x.isExpanded = true;
       this.diagram.dataBind();
-      this.diagram.doLayout();
+      // this.diagram.doLayout();
     }
   });
   this.spinner.hide();
@@ -471,7 +547,7 @@ export class OrgChartDiagramComponent implements OnInit {
       if(x.isExpanded == true){
         x.isExpanded = false;
         this.diagram.dataBind();
-        this.diagram.doLayout();
+        // this.diagram.doLayout();
       }
     })
     this.spinner.hide();
@@ -505,7 +581,7 @@ export class OrgChartDiagramComponent implements OnInit {
     var Height = AllDisplay.length * 35;
     if(this.orgChartData.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
-        if(r.data.replacementPersonID == null){
+        if(r.data?.replacementPersonID == null){
           r.height = Height;
           this.diagram.dataBind();
         }
@@ -536,7 +612,7 @@ export class OrgChartDiagramComponent implements OnInit {
         this.diagram.dataBind();
       })
     }
-    this.diagram.doLayout();
+    // this.diagram.doLayout();
     return Promise.resolve();
   }
 

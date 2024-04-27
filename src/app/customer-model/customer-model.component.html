@@ -22,18 +22,30 @@
   <h2 style="color: white;">{{titleName}}</h2>
   <h2 style="color: white;">{{titleDesc}}</h2>
 </div>
+<div style="align-content: center;margin-top: 5px;">
+  <div style="display: flex;flex-direction: row-reverse;white-space: nowrap;column-gap: 40px;font-size: 13px;grid-template-columns: auto auto;">
+  <div>
+      <div class="top-half"></div><span style="margin-left: 50px;">Matrix Position</span>
+  </div>
+  <div>
+      <span class="connectorline"></span><span style="margin-left: 50px;">Report to Indirect</span>
+  </div>
+  </div>
+</div>
 <div style="overflow: hidden;position: relative;">
     <ejs-diagram #diagram id="diagram" width="100%" height="600px" [layout]="layout"
         [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults" [dataSourceSettings]="data"
-        [scrollSettings]="scrollSettings" (created)="created($event)" [snapSettings]="snapSettings" [tool]="tool"
-        [pageSettings]="pageSettings">
+        [scrollSettings]="scrollSettings" (created)="created($event)" [snapSettings]="snapSettings" [tool]="tool" (wheel)="onWheel($event)"
+        [pageSettings]="pageSettings" >
         <ng-template #nodeTemplate let-data>
             <!-- {{findingDataVisible(data.data.positionID)}} -->
             <ng-container>
                 <div class="nodeitem" id="nodeitem"
                     [style.border]="data.data.objectType == 'MatrixPos' ? 'dotted 5px' : 'solid'"
                     [style.border-color]="data.data.objectType == 'Position' ? data.data.positionLevelColor  : data.data.objectType == 'MatrixPos' ? 'orange' : 'green'"
-                    style="height: 100%;  align-items: center; justify-content: center;background-color: white;">
+                    style="height: 100%;  align-items: center; justify-content: center;background-color: white;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+                    border-radius: 20px;width: 100%;
+                    color: white;">
                     <div style="display: flex; flex-direction: column;">
                         <div *ngIf="data.data.objectType == 'Position' || data.data.objectType =='MatrixPos'">
                           <img alt="profile" [src]="data.data.pictureUrl" style="width: 80px; height: 80px; border-radius: 50%; left:50%;transform: translate(-50%, -60%);
