@@ -4,6 +4,7 @@ import { CustomerModelComponent } from './customer-model/customer-model.componen
 import { OrgChartDiagramComponent } from './org-chart-diagram/org-chart-diagram.component';
 import { TestUnitComponent } from './components/test-unit/test-unit.component';
 import { OrgPositionComponent } from './components/org-position/org-position.component';
+import { TestExportComponent } from './components/test-export/test-export.component';
 const routes: Routes = [
   {
     path:'orgUnit',
@@ -20,6 +21,10 @@ const routes: Routes = [
   {
     path:'Position',
     component:OrgPositionComponent
+  },
+  {
+    path:'Export',
+    component:TestExportComponent
   }
 ];
 

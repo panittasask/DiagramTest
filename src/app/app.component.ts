@@ -14,16 +14,16 @@ export class AppComponent {
   public levelSearch:any=
   [
    {
-    value:1,text:"Minimal Layout"
+    value:1,text:"Position Chart Minimal"
    },
    {
-    value:2,text:"Position Chart"
+    value:3,text:"Position Chart Color"
    },
    {
-    value:3,text:"Org Chart"
+    value:2,text:"Organization Unit Chart"
    },
    {
-    value:4,text:"Org Unit"
+    value:4,text:"Organization Unit and Position Chart"
    }
   ];
 
@@ -33,7 +33,7 @@ export class AppComponent {
 
 
   public selectLayout(layout:any){
-    console.log("layout",layout)
+
     switch (layout.value){
       case 1:{
         this.router.navigate(['/test']);
@@ -53,10 +53,31 @@ export class AppComponent {
       }
     }
 
-    console.log("OutLet",this.outer.component)
+
   }
   refresh():void{
     window.location.reload();
+  }
+  ngOnInit():void{
+    switch(location.pathname)
+    {
+      case '/test':{
+        this.listLevel = 'Position Chart Minimal';
+        break;
+      }
+      case '/Position':{
+        this.listLevel = 'Organization Unit Chart';
+        break;
+      }
+      case '/orgChart':{
+        this.listLevel = 'Position Chart Color';
+        break;
+      }
+      case '/orgUnit':{
+        this.listLevel = 'Organization Unit and Position Chart';
+        break;
+      }
+    }
   }
 
 }

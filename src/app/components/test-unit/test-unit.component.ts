@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 import dataJsonUsing from '../../customer-model/Chart.json';
 import chart60node from '../../customer-model/Chart60Node.json';
 import orgUnit from '../../customer-model/OrgUnit.json';
-import orgChartData from '../../../model/P_Tee3.json';
+import orgChartData from '../../../model/Chart/OrgPosition.json';
 import { ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core';
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
 import { DataManager } from '@syncfusion/ej2-data';
@@ -49,6 +49,17 @@ export class TestUnitComponent {
   public orgChartData:any=orgChartData;
   public titleName:any=orgChartData.titleName;
   public titleDesc:any=orgChartData.titleDesc;
+  public CheckExpandStatus:{[key:string]:boolean}={};
+  public inDirect:boolean = false;
+  public matrixposition:boolean =false;
+  public ShowField:{[key:string]:boolean}={};
+  public Caption:any={
+    n0:"",
+    n1:"",
+    n2:"",
+    n3:"",
+  }
+
 
   public data: Object = {
     id: 'positionID',
@@ -60,20 +71,20 @@ export class TestUnitComponent {
 
   public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity'};
   public pageSettings:PageSettingsModel ={
-    showPageBreaks:true,margin:{left:-200,right:-200,top:-200,bottom:-200}
+    // showPageBreaks:true,margin:{left:-200,right:-200,top:-200,bottom:-200}
   }
   public layout: LayoutModel  = {
     type:'HierarchicalTree',
     connectionDirection:'Auto',
-    verticalSpacing: 200,
     enableRouting:true,
-    enableAnimation:false,
+    enableAnimation:true,
+    verticalSpacing: 200,
     horizontalSpacing: 90,
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
-    getLayoutInfo: (node: Node, options: TreeInfo,) => {
+    getLayoutInfo: (node: Node, options: TreeInfo) => {
       if (!options.hasSubTree) {
-        options.type = 'Balanced';
-          options.orientation = 'Horizontal';
+        options.orientation = 'Vertical';
+        options.type = 'Right';
       }
     },
   };
@@ -99,7 +110,7 @@ export class TestUnitComponent {
       var getSourceId:any = diagram.nodes.filter((x:any) => x.id == connector.targetID)
       if(getSourceId.length > 0){
         if(getSourceId[0].data.reportToType == "org_ReportToInDirect"){
-          connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'2 4',};
+          connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'5,5',};
         }else{
           connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'0',};
         }
@@ -109,75 +120,65 @@ export class TestUnitComponent {
       connector.targetDecorator.shape = 'none';
       return connector;
   }
+  public updateCheckValue(id:any){
+    this.CheckExpandStatus[id] = this.CheckValue(id);
+  }
+
+  public CheckValue(data:any){
+    let Nodes:any = this.diagram.nodes.filter((x:any)=>x.id == data);
+    return Nodes[0].isExpanded;
+  }
 
   public created(args:Object): void {
+
     this.spinner.show();
-    this.diagram.constraints = DiagramConstraints.Default ;
+    setTimeout(() => {
+      for(const item of this.diagram.nodes){
+        this.updateCheckValue(item.id)
+      }
+      this.diagram.constraints = DiagramConstraints.Default ;
     this.diagram.scrollSettings = { scrollLimit: 'Infinity' };
     this.diagram.tool = DiagramTools.ZoomPan;
     let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
     let cd = this.findDuplicate(AllOffset);
     let arrObj:any=[];
-    for(var i = 1 ;i < cd.length +1;i++){
+    for(let i = 1 ;i < cd.length +1;i++){
       arrObj.push({value:i})
     }
     this.levelSearch=[...arrObj];
-    for(var i=0;i<cd.length;i++){
+    for(let i=0;i<cd.length;i++){
       this.diagram.nodes.forEach((x:any)=>{
         if(cd[i] == x.offsetY){
           x.data.levelItem = i+1;
         }
       })
     }
-    (async() =>{
-
-      for await(let item of this.diagram.nodes){
-
-        // item.isExpanded = false;
-        // await this.sleep(10);
-
-      }
-      await this.SetDynamicNode();
-        this.height = this.diagram.nodes[0].height ? this.diagram.nodes[0].height : 500;
-        this.width = this.diagram.nodes[0].width ? this.diagram.nodes[0].width : 450;
+      this.SetDynamicNode();
       this.diagram.dataBind();
-      this.diagram.doLayout();
-      if(this.diagram.nodes[0].wrapper != undefined){
-        this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
-      }
-    })();
     this.selectLevel({value:2})
-    if(this.diagram.nodes[0].wrapper != undefined){
-      this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
-    }
-    // this.diagram.nodes.forEach((x:any)=>{
-    //   x.height = h;
-    //   this.diagram.dataBind();
-    // }
-    //this.diagram.doLayout();
-    let zoomoptions:ZoomOptions ={
-      type:'ZoomOut',
-      zoomFactor:1.2
-    }
-    this.diagram.zoom(0.2);
-    this.spinner.hide();
     this.diagram.dataBind();
+    }, 1000);
+
   }
 
   public selectLevel(args:any){
     this.spinner.show();
-    if(args != null){
+    setTimeout(() => {
+          if(args != null){
       this.diagram.nodes.forEach((x:any)=>{
-        if(x.data.levelItem < args.value){
+          if(x.data.levelItem < args.value){
           x.isExpanded = true;
+          this.CheckExpandStatus[x.id] = true;
         }else{
           x.isExpanded = false;
+          this.CheckExpandStatus[x.id] = false;
         }
         this.diagram.dataBind();
       })
-
     }
     this.spinner.hide();
+    }, 500);
+
   }
   public changeHeight(){
     this.spinner.show;
@@ -209,106 +210,13 @@ export class TestUnitComponent {
     return selectData;
   }
 
-  public countChild(){
-    for(var i = 0;i < this.diagram.nodes.length;i++){
-        let main:any = this.diagram.nodes[i];
-        let child:any = this.diagram.nodes.filter((x:any)=>x.data.reportToPositionID == main.data.positionID);
-        if(child.length > 0){
-          main.data.child = child.length;
-        }
-    }
-    this.diagram.dataBind();
-  }
-  public toCenter(){
-        let bound = new Rect(200, 400, 500, 400);
-        this.diagram.bringIntoView(bound);
-  }
-
-  public matchingNodes: any;
-  public currentIndex: number;
-
-  public search(input: any) {
-
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.matchingNodes[this.currentIndex].style.strokeColor = 'black';
-      this.matchingNodes[this.currentIndex].style.strokeWidth = 1;
-    }
-    const searchText = (document.getElementById('searchBox') as any).value
-      .replace(/\s+/g, '')
-      .toLowerCase();
-    const searchWords = searchText.split(/\s+/);
-    const searchRegex = new RegExp(
-      searchWords.map((word: any) => `\\b${word}\\b`).join('.*'),
-      'i'
-    );
-    this.matchingNodes = [];
-    this.currentIndex = 0;
-    this.diagram.clearSelection();
-
-    if (searchText !== '') {
-      this.matchingNodes = this.diagram.nodes.filter((node) => {
-        if (
-          searchRegex.test((node.data as any).Type.replace(/\s+/g, '').toLowerCase()) || (node.data as any).Type.toLowerCase().includes(searchText)
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-      if (this.matchingNodes && this.matchingNodes.length > 0) {
-        this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      }
-    } else {
-      this.matchingNodes = [];
-    }
-
-  }
-
-  public next() {
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.diagram.clearSelection();
-      this.currentIndex = (this.currentIndex + 1) % this.matchingNodes.length;
-      this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      let bound = new Rect(200, 400, 500, 400);
-      //this.diagram.bringIntoView(bound);
-    }
-
-  }
-  public CheckValue(data:any){
-    let Nodes:any = this.diagram.nodes.filter((x:any)=>x.id == data);
-    return Nodes[0].isExpanded;
-  }
-
   public Expand(node:any){
     let nodeData:any = this.diagram.nodes.find((x:any)=> x.id == node);
     this.spinner.show();
     nodeData.isExpanded = !nodeData.isExpanded;
-    this.diagram.dataBind();
-    if(this.diagram.nodes[0].wrapper != undefined){
-      //this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
-    }
-    // this.diagram.fitToPage();
-      this.spinner.hide();
-    // this.diagram.refresh();
+    this.CheckExpandStatus[node] = nodeData.isExpanded;
+    this.spinner.hide();
   }
-
-  public previous() {
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.diagram.clearSelection();
-      this.currentIndex =
-        (this.currentIndex - 1 + this.matchingNodes.length) %
-        this.matchingNodes.length;
-      this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      //let bound = new Rect(200, 400, 500, 400);
-      //this.diagram.bringIntoView(bound);
-    }
-  }
-
-
-  public OrgChart(){
-
-  }
-
 
   public ExportOptions(){
     this.spinner.show();
@@ -338,55 +246,62 @@ export class TestUnitComponent {
     }
   );
   }
-
   ExpandAll(){
     this.spinner.show();
-  //   (async() =>{
-  //   for await(let item of this.diagram.nodes){
-  //     item.isExpanded = true;
-  //     await this.sleep(10);
-  //   }
-  //   this.diagram.dataBind();
-  //   this.diagram.doLayout();
-  //   if(this.diagram.nodes[0].wrapper != undefined){
-  //     this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
-  //   }
-  //   this.spinner.hide();
-  // })();
-
+    setTimeout(()=>{
   this.diagram.nodes.forEach((x:any)=>{
     if(x.isExpanded == false){
       x.isExpanded = true;
+      this.CheckExpandStatus[x.id] = true;
+      this.listLevel = this.levelSearch.length;
       this.diagram.dataBind();
-      this.diagram.doLayout();
+      // this.diagram.doLayout();
     }
   });
   this.spinner.hide();
+    },500)
 
   }
   CollapsAll(){
     this.spinner.show();
-    this.diagram.nodes.forEach((x:any)=>{
+    setTimeout(() => {
+          this.diagram.nodes.forEach((x:any)=>{
       if(x.isExpanded == true){
         x.isExpanded = false;
+        this.CheckExpandStatus[x.id] = false;
+        this.listLevel = this.levelSearch[0].value;
         this.diagram.dataBind();
-        this.diagram.doLayout();
+        // this.diagram.doLayout();
       }
     })
     this.spinner.hide();
+    }, 500);
+
   }
-
-
-  async sleep(ms:number){
-    return new Promise(resolve => setTimeout(resolve,ms));
-   }
   ngOnInit(){
-    this.spinner.show();
+
     this.isShow.forEach((x:any) =>{
       if(this.orgChartData.isDisplayColumn.toUpperCase().split('|').includes(x.name.toUpperCase())){
         x.visible = true;
       }
     })
+    let type = 'org_ReportToInDirect';
+    let mat = 'MatrixPos';
+    let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
+    if(inDirect.length > 0)
+      this.inDirect = true;
+    let matrix = this.orgChartData.data.filter((x:any)=>x.objectType.toUpperCase() == mat.toUpperCase());
+    if(matrix.length > 0)
+      this.matrixposition = true;
+
+    let ShowData = this.orgChartData.isDisplayColumn.toUpperCase().split('|');
+    ShowData.forEach((x:any)=>{
+      this.ShowField[x] = true;
+    })
+    this.Caption.n0 = this.orgChartData.n0Caption;
+    this.Caption.n1 = this.orgChartData.n1Caption;
+    this.Caption.n2 = this.orgChartData.n2Caption;
+    this.Caption.n3 = this.orgChartData.n3Caption;
   }
 
   onWheel(event:any){
@@ -401,17 +316,7 @@ export class TestUnitComponent {
     this.diagram.dataBind();
   }
 
-  public CheckVisible(data:any){
-    let findItem = this.isShow.filter((x:any)=>x.name.toUpperCase() == data.toUpperCase());
-    let check = false;
-    if(findItem.length > 0){
-      check = findItem[0].visible
-    }else{
-      check = false;
-    }
-    return check;
-  }
-  public async SetDynamicNode(){
+  public SetDynamicNode(){
     var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
     var Height = AllDisplay.length * 35;
     if(this.orgChartData.boxHeight == null){
@@ -447,8 +352,6 @@ export class TestUnitComponent {
         this.diagram.dataBind();
       })
     }
-    this.diagram.doLayout();
-    return Promise.resolve();
   }
 
 

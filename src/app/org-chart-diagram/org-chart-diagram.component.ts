@@ -6,13 +6,13 @@ import dataJsonUsing from '../customer-model/Chart.json';
 import chart60node from '../customer-model/Chart60Node.json';
 import orgUnit from '..//customer-model/OrgUnit.json';
 import orgChartData from '../../model/P_Tee3.json';
-
+import { CheckValuePipe } from '../components/check-value.pipe';
 
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
 import {FormControl, FormGroup, ReactiveFormsModule, FormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Component, ViewEncapsulation, ViewChild, ElementRef, ViewChildren, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, } from '@angular/core';
+import { Component, ViewEncapsulation, ViewChild, ElementRef, ViewChildren, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, ɵɵtrustConstantResourceUrl, model, } from '@angular/core';
 import { Router } from 'express';
 import {
   DiagramComponent,
@@ -65,6 +65,10 @@ import {
   Overview,
   HierarchicalTree,
   Shape,
+  RulerSettingsModel,
+  BpmnDiagrams,
+  UndoRedo,
+  TextStyleModel,
 } from '@syncfusion/ej2-diagrams';
 import { DataManager } from '@syncfusion/ej2-data';
 import { ChangeEventArgs as NumericChangeEventArgs } from '@syncfusion/ej2-inputs';
@@ -76,7 +80,6 @@ import { ExpandMode } from '@syncfusion/ej2-navigations';
 import ModelData from '..//customer-model/MogData';
 import { connect } from 'http2';
 import { wrap } from 'module';
-import { ControlPoints, CornerRadius, IExportEventArgs, Margin, colorNameToHex } from '@syncfusion/ej2-angular-charts';
 import { content, setStyleAndAttributes } from '@syncfusion/ej2-angular-grids';
 import Data from '../customer-model/dataObject';
 import { response } from 'express';
@@ -91,16 +94,9 @@ import { parse } from 'path';
 import { promiseHooks } from 'v8';
 import { ConsoleService } from '@ng-select/ng-select/lib/console.service';
 import { notDeepStrictEqual } from 'assert';
-
-Diagram.Inject(
-  DataBinding,
-  ComplexHierarchicalTree,
-  LineRouting,
-  LineDistribution,
-  ConnectorEditing,
-  HierarchicalTree,
-);
-
+import { RulerSettings } from '@syncfusion/ej2-diagrams/src/diagram/diagram/ruler-settings';
+import { addObjectToGrid } from '@syncfusion/ej2-diagrams/src/diagram/utility/swim-lane-util';
+import { ConnectableObservable } from 'rxjs';
 export interface EmployeeInfo {
   Role: string;
   color: string;
@@ -121,13 +117,12 @@ export interface MyObject {
   // changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class OrgChartDiagramComponent implements OnInit {
+export class OrgChartDiagramComponent{
   @ViewChild('diagram')
-  //@ViewChild('overview') el:ElementRef<HTMLImageElement>
   public diagram: DiagramComponent;
-  @ViewChild('nodeItem',{static:true}) public nodeItem:any;
-  constructor(private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService){}
-  @ViewChild('overview') public overview:Overview;
+  constructor(private http:HttpClient,private spinner:NgxSpinnerService,private cdr: ChangeDetectorRef){
+
+  }
   public connectors: ConnectorModel;
   public customerData: any = dataCustomer;
   public ModelData: any = Data;
@@ -137,9 +132,6 @@ export class OrgChartDiagramComponent implements OnInit {
   public node60:any = chart60node;
   public orgunit:any = orgUnit;
   public isChild: boolean = false;
-  public snapSettings: SnapSettingsModel = {
-    constraints:  ~(SnapConstraints.ShowLines)
-  };
   public levelSearch:any =[];
   public visible: boolean = false;
   public visibleObject: any;
@@ -148,9 +140,15 @@ export class OrgChartDiagramComponent implements OnInit {
   public listLevel:number=2;
   public height:number = 500;
   public width:number = 450;
+  public wspaceing:number = 0;
+  public hspaceing:number = 0;
   public orgChartData:any=orgChartData;
   public titleName:any=orgChartData.titleName;
   public titleDesc:any=orgChartData.titleDesc;
+  public ExpandStatus:{[key:string]:boolean}={}
+  public inDirect:boolean = false;
+  public matrixposition:boolean =false;
+
 
   public data: Object = {
     id: 'positionID',
@@ -159,87 +157,93 @@ export class OrgChartDiagramComponent implements OnInit {
     doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
     }
   };
-  public addTitle(){
-    let titleName = this.titleName;
-    let titleDesc = this.titleDesc;
-    let width:any = document.getElementById('diagram')?.offsetWidth;
-    let hgeith:any = document.getElementById('diagram')?.offsetHeight;
-    let offsetX = this.diagram.nodes[0].offsetX;
-    let offsetOfDiagram = this.diagram;
-    let widhtData:any =this.diagram.scrollSettings.viewPortWidth;
-    console.log("height",width)
-    let node:NodeModel = {
-      offsetX:(widhtData)*10,
-      offsetY:-500,
-      id:'title',
-      shape:{
-        type:'HTML',
-        content:`<div style="offset-position:top;padding-top:100px;padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100%;width:100%;align-items: center;text-align: center;vertical-align: center;"><h2 style="color: white;font-size:100px;margin-top:100px">${titleName}</h2><h2 style="color: white;font-size:100px;margin-top:150px">${titleDesc}</h2></div>`
-      },
-      // constraints:NodeConstraints.AllowMovingOutsideLane & NodeConstraints.Default
-    }
-    this.diagram.add(node);
-    // let bottomnode:NodeModel = {
-    //   offsetX:(width*19)/2.2,
-    //   offsetY:hgeith+5000,
-    //   id:'bottomNode',
-    //   shape:{type:'Basic',shape:'Rectangle'},
-    //   style:{fill:'#8ACDD7'}
-    // }
-    // this.diagram.add(bottomnode);
-    let nodetitle:any = this.diagram.nodes.find((x:any)=> x.id == 'title')
-    // let width:any = document.getElementById('diagram')?.offsetWidth;
-    nodetitle.width = width*20;
-    nodetitle.height = 700;
-    // this.diagramthing();
-  }
-  public scrollSettings: ScrollSettingsModel = {scrollLimit:'Diagram',padding :{left:50,right:50,top:50,bottom:50}};
-  public pageSettings:PageSettingsModel ={
-    showPageBreaks:true
-  }
+  public tool: DiagramTools = DiagramTools.ZoomPan;
+public snapSettings: SnapSettingsModel = { constraints:SnapConstraints.None };
+public scrollSettings: ScrollSettingsModel = { scrollLimit: 'Infinity',
+padding:{left:100,right:100,top:100,bottom:100} };
+
+
   public layout: LayoutModel  = {
     type:'HierarchicalTree',
     connectionDirection:'Auto',
-    verticalSpacing: 120,
     enableRouting:true,
-    enableAnimation:false,
+    enableAnimation:true,
+    verticalSpacing: 200,
     horizontalSpacing: 90,
-    horizontalAlignment:'Stretch',
-    verticalAlignment:'Stretch',
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
-    getLayoutInfo: (node: Node, options: TreeInfo,) => {
+    getLayoutInfo: (node: Node, options: TreeInfo) => {
       if (!options.hasSubTree) {
-          options.type = 'Balanced';
-          options.orientation = 'Horizontal';
+        options.orientation = 'Vertical';
+        options.type = 'Right';
       }
     },
   };
+  public nodes :NodeModel[] = [
+    {
+      id:'title',
+      offsetX:150,
+      offsetY:-400,
+      annotations:[{
+        content:`${this.titleName} ${this.titleDesc}`,
+        style:{strokeColor:'none',color:'black',fontSize:90,textWrapping:'NoWrap'}
+      }],
+      excludeFromLayout:true,
+      height:200,
+      width:200,
+    },
+    {
+      id:'descritpion',
+      shape:{type:'HTML',content:
+      `<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
+      <div [style.background]="'#7286D3'" style="background:#7286D3" class="circle"></div>
+      <div class="text">ตำแหน่งหลัก</div>
+      <div [style.background]="'#B9F3FC'" style="background:#B9F3FC" class="circle"></div>
+      <div class="text">ตำแหน่งรอง</div>
+      <div [style.background]="'#F6995C'" style="background:#F6995C" class="circle"></div>
+      <div class="text">รักษาการ</div>
+      <div class="rectangletooltip"></div>
+      <div class="text">Matrix Position</div>
+      <hr class="linetooltip">
+      <div class="text">Report to Indirect</div>
+    </div>`},
+      offsetX:150,
+      offsetY:-100,
+      excludeFromLayout:true,
+      height:200,
+      width:1000,
+    }
+  ]
 
-  public nodeDefaults(obj: any): NodeModel {
-    // obj.constraints = NodeConstraints.Default & ~( NodeConstraints.Select) ;
-    obj.shape = { type: 'HTML' };
-    // obj.offsetX = 100;
-    // obj.offsetY = 100;
-    obj.height = 500;
+  public nodeDefaults(obj: any,diagram:DiagramComponent): NodeModel {
+    // obj.constraints = ~(NodeConstraints.AllowMovingOutsideLane);
+    if(obj.id == 'title'){
+      obj.height = 200;
+      obj.style = { fill: 'white', strokeColor: 'none', color: 'white' };
+    }
+    else if(obj.id == 'descritpion'){
+      obj.height = 200;
+      obj.style = { fill: 'white', strokeColor: 'none', color: 'white' };
+    }
+    else{
+      obj.shape = { type: 'HTML' };
+      obj.height = 500;
+      obj.width = 450;
+    }
+
     return obj;
   }
   public connDefaults(
     connector: any, diagram: Diagram): ConnectorModel {
-      connector.targetDecorator.height = 20;
-      connector.targetDecorator.width = 20;
-      connector.targetDecorator.style.fill = 'red';
-      connector.targetDecorator.style.strokeColor = 'red';
-      connector.connectorSpacing = 30;
+      connector.connectorSpacing = 200;
       connector.type = 'Orthogonal';
-      connector.bridgeSpace = 100;
-      connector.constraints = ConnectorConstraints.Default;
-      connector.cornerRadius = 10;
+      connector.bridgeSpace = 200;
+      connector.cornerRadius = 8;
       connector.style.fill = '#858383';
       connector.style.strokeColor = '#858383';
-      var getSourceId:any = diagram.nodes.filter((x:any) => x.id == connector.targetID)
+      let getSourceId:any = diagram.nodes.filter((x:any) => x.id == connector.targetID)
       if(getSourceId.length > 0){
         if(getSourceId[0].data.reportToType == "org_ReportToInDirect"){
-          connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'2 4',};
+          connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'5,5',};
         }else{
           connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'0',};
         }
@@ -249,66 +253,63 @@ export class OrgChartDiagramComponent implements OnInit {
       connector.targetDecorator.shape = 'none';
       return connector;
   }
-  public cleanerAfterExport(){
-    this.diagram.remove(this.diagram.nodes.find((x:any)=>x.id == 'title'))
-    // this.diagram.remove(this.diagram.nodes.find((x:any)=>x.id == 'bottomNode'))
-  }
+
   public created(args:Object): void {
+
     this.spinner.show();
-    this.diagram.constraints = DiagramConstraints.Default & ~DiagramConstraints.PageEditable ;
-    this.diagram.scrollSettings ={scrollLimit:'Infinity'};
-    this.diagram.pageSettings = {showPageBreaks:true};
-    this.diagram.tool = DiagramTools.ZoomPan;
-    let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
-    let offsetX = this.diagram.nodes.map((x:any)=>x.offsetX)
-    let xcd = this.findDuplicate(offsetX);
-    let cd = this.findDuplicate(AllOffset);
-    let arrObj:any=[];
-    for(let i = 1 ;i < cd.length +1;i++){
-      arrObj.push({value:i})
-    }
-    this.levelSearch=[...arrObj];
-    for(let i=0;i<cd.length;i++){
+    setTimeout(()=>{
       this.diagram.nodes.forEach((x:any)=>{
-        if(cd[i] == x.offsetY){
-          x.data.levelItem = i+1;
-        }
+        this.ExpandStatus[x.id] = x.isExpanded;
       })
-    }
-    xcd = xcd.sort();
-    for(let i=0;i<xcd.length;i++){
-        this.diagram.nodes.forEach((x:any)=>{
-          if(xcd[i] == x.offsetX){
-            x.data.sideItem = i+1;
-          }
-      })
-    }
-
-
-      this.SetDynamicNode();
-        this.height = this.diagram.nodes[0].height ? this.diagram.nodes[0].height : 500;
-        this.width = this.diagram.nodes[0].width ? this.diagram.nodes[0].width : 450;
-      this.diagram.dataBind();
-      // this.diagram.doLayout();
-      if(this.diagram.nodes[0].wrapper != undefined){
-        this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
+      let AllOffset = [...this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetY)]
+      let offsetX = [...this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetX)]
+      let xcd = this.findDuplicate(offsetX);
+      let cd = this.findDuplicate(AllOffset);
+      let arrObj:any=[];
+      for(let i = 1 ;i < cd.length +1;i++){
+        arrObj.push({value:i})
       }
-      this.spinner.hide();
-    if(this.diagram.nodes[0].wrapper != undefined){
-    }
+      this.levelSearch=[...arrObj];
+      for(let i=0;i<cd.length;i++){
+        this.diagram.nodes.forEach((x:any)=>{
+          if(x.id != 'title' && x.id !='descritpion'){
+            if(cd[i] == x.offsetY){
+              x.data.levelItem = i+1;
+            }
+          }
 
-    this.selectLevel({value:2});
-    this.diagram.zoom(0.2);
-    this.spinner.hide();
-    this.diagram.dataBind();
-    let sideLevelData = this.diagram.nodes.filter((x:any)=>x.id != 'title').sort((a:any,b:any) => a.data?.sideItem - b.data?.sideItem)
-    let lastOffsetX = this.diagram.nodes[this.diagram.nodes.length - 1];
-    this.lastOffsetX = lastOffsetX.offsetX;
-    this.firstOffsetX = sideLevelData[0].offsetX;
-    console.log("firstOffsetX",this.firstOffsetX)
-    console.log("ViewPort",this.diagram.scrollSettings.viewPortWidth)
-    this.cleanerAfterExport();
-    this.addTitle();
+        })
+      }
+      xcd = xcd.sort();
+      for(let i=0;i<xcd.length;i++){
+          this.diagram.nodes.forEach((x:any)=>{
+            if(x.id != 'title' && x.id !='descritpion'){
+              if(xcd[i] == x.offsetX){
+                x.data.sideItem = i+1;
+              }
+            }
+        })
+      }
+        this.SetDynamicNode();
+          this.height = this.diagram.nodes[0]?.height ? this.diagram.nodes[0].height : 500;
+          this.width = this.diagram.nodes[0]?.width ? this.diagram.nodes[0].width : 450;
+      this.selectLevel({value:2},true);
+      const titlenode:any = this.diagram.nodes.find((x:any)=> x.id == 'title');
+      (titlenode as any).visible = false;
+      (titlenode as any).height = 200;
+      (titlenode as any).width = 1000;
+      (titlenode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /2;
+      const descriptionnode:any = this.diagram.nodes.find((x:any)=>x.id =='descritpion');
+      (descriptionnode as any).visible = false;
+      (descriptionnode as any).height = 200;
+      (descriptionnode as any).width = 1000;
+      (descriptionnode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /0.5;
+      this.diagram.dataBind();
+      // this.spinner.hide();
+    },500)
+
+
+
   }
 
   onWheel(event:any){
@@ -323,42 +324,31 @@ export class OrgChartDiagramComponent implements OnInit {
     this.diagram.dataBind();
   }
 
-  public selectLevel(args:any){
-    this.cleanerAfterExport();
-    if(args != null){
-      this.diagram.nodes.forEach((x:any)=>{
-
-        if(x.data.levelItem < args.value){
-          x.isExpanded = true;
-        }else{
-          x.isExpanded = false;
-        }
-        // this.diagram.dataBind();
-      })
-      // this.diagram.dataBind();
+  public selectLevel(args:any,isCreated:boolean = false){
+    if(!isCreated){
+      this.spinner.show();
     }
-    // this.diagramthing();
-    this.addTitle();
-  }
-  public firstOffsetX:any;
-  public lastOffsetX:any;
-  public changeHeight(){
-    this.spinner.show;
-    this.diagram.nodes.forEach((x:any)=>{
-      x.height = this.height;
-      this.diagram.dataBind();
-    })
-    this.spinner.hide();
-    // this.diagram.doLayout();
-  }
-  public changeWidth(){
-    this.spinner.show;
-    this.diagram.nodes.forEach((x:any) =>{
-      x.width = this.width;
-      this.diagram.dataBind();
-    })
-    this.spinner.hide();
-    // this.diagram.doLayout();
+
+    setTimeout(()=>{
+
+      if(args != null){
+        this.diagram.nodes.forEach((x:any)=>{
+          if(x.id != 'title' && x.id != 'descritpion'){
+            if(x.data.levelItem < args.value){
+              x.isExpanded = true;
+
+            }else{
+              x.isExpanded = false;
+            }
+            this.diagram.dataBind();
+          }
+          this.ExpandStatus[x.id]=x.isExpanded;
+        })
+      }
+
+      this.spinner.hide();
+    },500)
+
   }
 
   public findDuplicate(data:any){
@@ -372,211 +362,118 @@ export class OrgChartDiagramComponent implements OnInit {
     return selectData;
   }
 
-  public countChild(){
-    for(var i = 0;i < this.diagram.nodes.length;i++){
-        let main:any = this.diagram.nodes[i];
-        let child:any = this.diagram.nodes.filter((x:any)=>x.data.reportToPositionID == main.data.positionID);
-        if(child.length > 0){
-          main.data.child = child.length;
-        }
-    }
-    this.diagram.dataBind();
-  }
-  public toCenter(){
-        let bound = new Rect(200, 400, 500, 400);
-        this.diagram.bringIntoView(bound);
-  }
 
-  public ZoomOut(){
-    let ZoomOptions:ZoomOptions={
-      type:"ZoomOut",
-      zoomFactor:0.1,
-    }
-    this.diagram.zoomTo(ZoomOptions)
-  }
-  public matchingNodes: any;
-  public currentIndex: number;
-
-  public search(input: any) {
-
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.matchingNodes[this.currentIndex].style.strokeColor = 'black';
-      this.matchingNodes[this.currentIndex].style.strokeWidth = 1;
-    }
-    const searchText = (document.getElementById('searchBox') as any).value
-      .replace(/\s+/g, '')
-      .toLowerCase();
-    const searchWords = searchText.split(/\s+/);
-    const searchRegex = new RegExp(
-      searchWords.map((word: any) => `\\b${word}\\b`).join('.*'),
-      'i'
-    );
-    this.matchingNodes = [];
-    this.currentIndex = 0;
-    this.diagram.clearSelection();
-
-    if (searchText !== '') {
-      this.matchingNodes = this.diagram.nodes.filter((node) => {
-        if (
-          searchRegex.test((node.data as any).Type.replace(/\s+/g, '').toLowerCase()) || (node.data as any).Type.toLowerCase().includes(searchText)
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-      if (this.matchingNodes && this.matchingNodes.length > 0) {
-        this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      }
-    } else {
-      this.matchingNodes = [];
-    }
-
-  }
-
-  public next() {
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.diagram.clearSelection();
-      this.currentIndex = (this.currentIndex + 1) % this.matchingNodes.length;
-      this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      let bound = new Rect(200, 400, 500, 400);
-      //this.diagram.bringIntoView(bound);
-    }
-
-  }
-  public CheckValue(data:any){
-    let Nodes:any = this.diagram.nodes.filter((x:any)=>x.id == data);
-    return Nodes[0].isExpanded;
-  }
 
   public Expand(node:any){
-    // this.spinner.show();
+    this.spinner.show();
     let nodeData:any = this.diagram.nodes.find((x:any)=> x.id == node);
     nodeData.isExpanded = !nodeData.isExpanded;
-
-    if(nodeData.wrapper != undefined){
-      this.diagram.bringToCenter(nodeData.wrapper.bounds);
-    }
-      this.spinner.hide();
-      this.diagramthing()
-    // this.diagram.refresh();
-  }
-
-  public previous() {
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.diagram.clearSelection();
-      this.currentIndex =
-        (this.currentIndex - 1 + this.matchingNodes.length) %
-        this.matchingNodes.length;
-      this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      //let bound = new Rect(200, 400, 500, 400);
-      //this.diagram.bringIntoView(bound);
-    }
-  }
-
-
-  public OrgChart(){
-
-  }
-  public diagramthing(){
+    this.ExpandStatus[node] = nodeData.isExpanded;
     this.diagram.dataBind();
-    // this.diagram.doLayout();
+    this.spinner.hide();
+
   }
+
 
   public ExportOptions(){
     this.spinner.show();
     // this.addTitle();
-    let styleSheets = document.styleSheets;
-    let htmlData:string = this.diagram.getDiagramContent(styleSheets);
-    // this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'title'))
-    // this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'bottomNode'))
+    let titleNode:any = this.diagram.nodes.find((x:any)=>x.id == 'title')
+    let tooltopnode:any = this.diagram.nodes.find((x:any)=>x.id == 'descritpion')
+    tooltopnode.visible = true;
+    titleNode.visible = true;
+    let stylesheet = document.styleSheets;
+    let htmlData = this.diagram.getDiagramContent();
     const url = 'https://localhost:44301/home/generatedocument';
-    const header = new HttpHeaders({
-      'Content-type':'application/json'
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
     });
-    let dtName = new Date();
-    const options = { headers :header};
-    const requestData = JSON.stringify({options:htmlData});
-    this.http.post(url,requestData,options).subscribe((result:any)=>{
+    const options = { headers: headers };
+    const requestData = JSON.stringify({ Options: htmlData });
+    titleNode.visible = false;
+    tooltopnode.visible = false;
+    this.http.post(url, requestData, options).subscribe((result:any)=>{
+    var base64Data = result.result;
 
-      this.diagram.exportImage(result.result, {
-        fileName: 'diagram'+dtName.toString(),
-        // margin : { left: 100, right: 100, top: 100, bottom: 100 },
-        mode: 'Download',
-        region: 'Content',
-        pageHeight:5000,
-        stretch: 'None',
-        format:'PNG',
-      });
-      // this.cleanerAfterExport();
-      // this.diagram.remove(this.diagram.nodes.find((x:any)=> x.id == 'title'))
-      this.diagramthing();
-      this.spinner.hide();
+
+      var img = new Image();
+      img.src = base64Data;
+
+
+      img.onload = () => {
+        // Create a canvas element
+        var canvas = document.createElement('canvas');
+        var ctx:any = canvas.getContext('2d');
+
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      ctx.drawImage(img, 0, 0,  canvas.width ,  canvas.height);
+
+        var modifiedBase64Data = canvas.toDataURL('image/png');
+
+        var link = document.createElement('a');
+        link.download = 'DataDownload.png';
+        link.href = modifiedBase64Data;
+
+        link.click();
+
+    this.spinner.hide();
+    }
     }
   );
   }
 
   ExpandAll(){
     this.spinner.show();
-  //   (async() =>{
-  //   for await(let item of this.diagram.nodes){
-  //     item.isExpanded = true;
-  //     await this.sleep(10);
-  //   }
-  //   this.diagram.dataBind();
-  //   this.diagram.doLayout();
-  //   if(this.diagram.nodes[0].wrapper != undefined){
-  //     this.diagram.bringToCenter(this.diagram.nodes[0].wrapper.bounds);
-  //   }
-  //   this.spinner.hide();
-  // })();
-
-  this.diagram.nodes.forEach((x:any)=>{
-    if(x.isExpanded == false){
-      x.isExpanded = true;
-      this.diagram.dataBind();
-      // this.diagram.doLayout();
-    }
-  });
-  this.spinner.hide();
-
+    setTimeout(()=>{
+      this.diagram.nodes.filter((x:any)=>x.id != 'title' && x.id != 'descritpion').forEach((x:any)=>{
+        if(x.isExpanded == false){
+          x.isExpanded = true;
+          this.diagram.dataBind();
+          // this.diagram.doLayout();
+        }
+        this.ExpandStatus[x.id]=x.isExpanded;
+      });
+      this.listLevel = this.levelSearch[this.levelSearch.length-1].value;
+      this.spinner.hide();
+    },500)
   }
+
+
   CollapsAll(){
     this.spinner.show();
-    this.diagram.nodes.forEach((x:any)=>{
-      if(x.isExpanded == true){
-        x.isExpanded = false;
-        this.diagram.dataBind();
-        // this.diagram.doLayout();
-      }
-    })
-    this.spinner.hide();
+    setTimeout(()=>{
+      this.diagram.nodes.filter((x:any)=>x.id != 'title' && x.id != 'descritpion').forEach((x:any)=>{
+        if(x.isExpanded == true){
+          x.isExpanded = false;
+          this.diagram.dataBind();
+        }
+        this.ExpandStatus[x.id] = x.isExpanded;
+      })
+      this.listLevel = this.levelSearch[0].value;
+      this.spinner.hide();
+    },500)
   }
 
 
-  async sleep(ms:number){
-    return new Promise(resolve => setTimeout(resolve,ms));
-   }
-  ngOnInit(){
-    this.spinner.show();
+  ngOnInit():void{
     this.isShow.forEach((x:any) =>{
       if(this.orgChartData.isDisplayColumn.toUpperCase().split('|').includes(x.name.toUpperCase())){
         x.visible = true;
       }
     })
+    let type = 'org_ReportToInDirect';
+    let mat = 'MatrixPos';
+    let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
+    if(inDirect.length > 0)
+      this.inDirect = true;
+    let matrix = this.orgChartData.data.filter((x:any)=>x.objectType.toUpperCase() == mat.toUpperCase());
+    if(matrix.length > 0)
+      this.matrixposition = true;
+  }
 
-  }
-  public CheckVisible(data:any){
-    let findItem = this.isShow.filter((x:any)=>x.name.toUpperCase() == data.toUpperCase());
-    let check = false;
-    if(findItem.length > 0){
-      check = findItem[0].visible
-    }else{
-      check = false;
-    }
-    return check;
-  }
-  public async SetDynamicNode(){
+  public SetDynamicNode(){
     var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
     var Height = AllDisplay.length * 35;
     if(this.orgChartData.boxHeight == null){
@@ -592,7 +489,7 @@ export class OrgChartDiagramComponent implements OnInit {
       })
     }else{
       this.diagram.nodes.forEach((r:any) =>{
-        if(r.data.replacementPersonID == null){
+        if(r.data?.replacementPersonID == null){
         r.height = this.orgChartData.boxHeight;
         this.diagram.dataBind();
         }else{
@@ -612,10 +509,7 @@ export class OrgChartDiagramComponent implements OnInit {
         this.diagram.dataBind();
       })
     }
-    // this.diagram.doLayout();
-    return Promise.resolve();
   }
-
 
 public isShow:any=[
   {

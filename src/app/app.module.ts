@@ -4,9 +4,10 @@ import { AccumulationChartModule } from '@syncfusion/ej2-angular-charts';
 
 import { AccumulationAnnotationService, AccumulationDataLabelService, AccumulationLegendService, AccumulationTooltipService, ChartAllModule } from '@syncfusion/ej2-angular-charts';
 
-import { LayoutAnimation,DiagramModule,DiagramAllModule, SymbolPaletteAllModule, OverviewAllModule, HierarchicalTreeService, MindMapService, RadialTreeService, ComplexHierarchicalTreeService, DataBindingService, SnappingService, PrintAndExportService, BpmnDiagramsService, SymmetricLayoutService, ConnectorBridgingService, UndoRedoService, DiagramContextMenuService, ConnectorEditingService, LayoutAnimationService } from '@syncfusion/ej2-angular-diagrams';
+import { LayoutAnimation, SymbolPaletteAllModule, OverviewAllModule, HierarchicalTreeService, MindMapService, RadialTreeService, ComplexHierarchicalTreeService, DataBindingService, SnappingService, PrintAndExportService, BpmnDiagramsService, SymmetricLayoutService, ConnectorBridgingService, UndoRedoService, DiagramContextMenuService, ConnectorEditingService, LayoutAnimationService } from '@syncfusion/ej2-angular-diagrams';
 
 import { GridAllModule } from '@syncfusion/ej2-angular-grids';
+import { DiagramModule } from '@syncfusion/ej2-angular-diagrams';
 
 import { ListViewAllModule } from '@syncfusion/ej2-angular-lists';
 
@@ -14,15 +15,15 @@ import { DateRangePickerModule } from '@syncfusion/ej2-angular-calendars';
 
 import { CircularGaugeModule } from '@syncfusion/ej2-angular-circulargauge';
 
-import { DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
+import { ComboBoxAllModule, DropDownListAllModule } from '@syncfusion/ej2-angular-dropdowns';
 
 import { MultiSelectModule } from '@syncfusion/ej2-angular-dropdowns';
 
-import { ToolbarModule } from '@syncfusion/ej2-angular-navigations';
+import { ToolbarModule, TreeViewModule } from '@syncfusion/ej2-angular-navigations';
 
 import { NumericTextBoxModule, ColorPickerModule, UploaderModule, TextBoxModule } from '@syncfusion/ej2-angular-inputs';
 
-import { DropDownButtonModule } from '@syncfusion/ej2-angular-splitbuttons';
+import { DropDownButtonModule, SplitButtonModule } from '@syncfusion/ej2-angular-splitbuttons';
 
 import { ButtonModule, CheckBoxModule, RadioButtonModule } from '@syncfusion/ej2-angular-buttons';
 
@@ -58,16 +59,20 @@ import { AppRoutingModule } from './app-routing.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { TestUnitComponent } from './components/test-unit/test-unit.component';
 import { OrgPositionComponent } from './components/org-position/org-position.component';
+import { TestExportComponent } from './components/test-export/test-export.component';
+import { PipeComponent } from './components/pipe/pipe.component';
+import { CheckValuePipe } from './components/check-value.pipe';
+import { DisplayCheckPipe } from './components/pipe/display-check.pipe';
 @NgModule({
-  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent, OrgPositionComponent],
+  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent, OrgPositionComponent, TestExportComponent, PipeComponent, CheckValuePipe, DisplayCheckPipe],
   imports: [
     AppRoutingModule,RouterLink,RouterOutlet,NgxSpinnerModule,
     RouterModule,
     MatProgressSpinnerModule,
     FontAwesomeModule,
     NgbModule,
-    DiagramAllModule,DiagramModule,
     ChartAllModule,
+    DiagramModule,
     GridAllModule,
     SymbolPaletteAllModule,
     OverviewAllModule,
@@ -96,6 +101,29 @@ import { OrgPositionComponent } from './components/org-position/org-position.com
     NgSelectModule,
     MatProgressSpinner,
     HttpClientModule,
+    ChartAllModule,
+    GridAllModule,
+    SymbolPaletteAllModule,
+    OverviewAllModule,
+    ButtonModule,
+    ColorPickerModule,
+    DateRangePickerModule,
+    CheckBoxModule,
+    AccumulationChartModule,
+    ToolbarModule,
+    DropDownButtonModule,
+    UploaderModule,
+    CircularGaugeModule,
+    DropDownListAllModule,
+    ListViewAllModule,
+    DialogAllModule,
+    TextBoxModule,
+    RadioButtonModule,
+    ComboBoxAllModule,
+    SplitButtonModule,
+    MultiSelectModule,
+    NumericTextBoxModule,
+    TreeViewModule,
   ],
   providers: [
     provideAnimationsAsync(),
@@ -108,10 +136,11 @@ import { OrgPositionComponent } from './components/org-position/org-position.com
     PrintAndExportService,
     BpmnDiagramsService,
     SymmetricLayoutService,
-    ConnectorBridgingService,
+    // ConnectorBridgingService,
     UndoRedoService,
     DiagramContextMenuService,
     ConnectorEditingService,
+    LayoutAnimationService,
   ],
   bootstrap: [AppComponent]
 })

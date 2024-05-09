@@ -110,3 +110,122 @@ font-family:  "Poppins","Notosans" !important;
 ::-webkit-scrollbar-track {
   background-color: #f0f0f0; /* Color of the scrollbar track */
 }
+
+
+.n0 {
+  position: relative;
+  display: inline-block;
+}
+/* Tooltip text */
+.n0 .n0tooltip {
+visibility: hidden;
+width: 200px;
+background-color: transparent;
+color: black;
+text-align: center;
+border-radius: 6px;
+padding: 10px 10px;
+position: absolute;
+z-index: 1;
+bottom: 100%;
+left: 20%;
+margin-left: -60px;
+}
+
+.n0:hover .n0tooltip{
+  visibility: visible;
+}
+
+
+
+.n1 {
+  position: relative;
+  display: inline-block;
+}
+/* Tooltip text */
+.n1 .n1tooltip {
+visibility: hidden;
+width: 200px;
+background-color: transparent;
+color: black;
+text-align: center;
+border-radius: 6px;
+padding: 10px 10px;
+position: absolute;
+z-index: 1;
+bottom: 100%;
+left: 20%;
+margin-left: -60px;
+}
+
+.n1:hover .n1tooltip{
+  visibility: visible;
+}
+
+
+.n2 {
+  position: relative;
+  display: inline-block;
+}
+/* Tooltip text */
+.n2 .n2tooltip {
+visibility: hidden;
+width: 200px;
+background-color: transparent;
+color: black;
+text-align: center;
+border-radius: 6px;
+padding: 10px 10px;
+position: absolute;
+z-index: 1;
+bottom: 100%;
+left: 20%;
+margin-left: -60px;
+}
+
+.n2:hover .n2tooltip{
+  visibility: visible;
+}
+
+
+.n3 {
+  position: relative;
+  display: inline-block;
+}
+/* Tooltip text */
+.n3 .n3tooltip {
+visibility: hidden;
+width: 200px;
+background-color: cyan;
+color: black;
+text-align: center;
+border-radius: 6px;
+padding: 10px 10px;
+position: absolute;
+z-index: 1;
+bottom: 100%;
+left: 20%;
+margin-left: -60px;
+}
+
+.n3:hover .n3tooltip{
+  visibility: visible;
+}
+
+.circle{
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+}
+.linetooltip{
+  width: 50px;
+  border: none;
+  border-top: 4px dashed black;
+  background-color: transparent;
+  height: 3px;
+  opacity: 100%;
+}
+.rectangletooltip{
+  border:3px dashed black;
+  padding: 10px 20px;
+}

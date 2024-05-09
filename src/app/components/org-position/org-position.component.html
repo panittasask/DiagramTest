@@ -1,22 +1,24 @@
 <div class="form-group row" style="margin-bottom: 20px;"
-    style="top: 20px;position: static;justify-content: center;align-items: center;">
+    style="top: 20px;position: static;justify-content: right;align-items: center;">
+    <div class="col-sm-7"></div>
+    <div class="col-sm-2 d-flex align-items-center">
+      <label for="level-select" style="margin-right: 8px;">Display Level</label>
+      <ng-select class="flex-grow-1" id="level-select" [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
+          (change)="selectLevel(listLevel)" [searchable]="true">
+      </ng-select>
+  </div>
     <div class="col-sm-1">
-        <input style="margin-left: 15px;" class="btn btn-outline-danger" type="button" id="export" value="export"
-            />
-    </div>
-    <!-- <div class="col-sm-1">
-        <ng-select [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
-            (change)="selectLevel(listLevel)" [searchable]="true">
-        </ng-select>
-    </div> -->
-    <div class="col-sm-1">
-        <input style="margin-left: 15px;" class="btn btn-outline-success" type="button" id="ExpandAll"
-             value="ExpandAll" (click)="collaps()" />
+        <input class="btn btn-outline-success" type="button" id="Expand All"
+             value="Expand All" (click)="ExpandAll()" />
     </div>
     <div class="col-sm-1">
-        <input style="margin-left: 15px;" class="btn btn-outline-info" type="button" id="CollapsAll"
-             value="CollapsAll" />
+        <input class="btn btn-outline-info" type="button" id="Collapse All"
+             value="Collapse All" (click)="CollapseAll()"/>
     </div>
+    <div class="col-sm-1">
+      <input style="margin-left: 12px;" class="btn btn-outline-danger" type="button" id="export" value="Export" (click)="Export()"
+          />
+  </div>
     <!-- <div class="col-sm-1">
         <input class="form-control" type="number" [(ngModel)]="height" (change)="changeHeight()">
     </div>
@@ -25,20 +27,109 @@
     </div> -->
     <div class="col-sm-6"></div>
 </div>
-<div style="padding-top: 10px;padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
-  <h2 style="color: white;">{{titleName}}</h2>
-  <h2 style="color: white;">{{titleDesc}}</h2>
+<div style="display: flex;background-color: #1464CC;border-radius: 10px 10px 0 0;justify-content: center; height: 56.4px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
+  <span style="color: white;font-size: 20px;">{{titleName}} {{titleDesc}}</span>
 </div>
-<div style="position: relative;overflow: hidden;">
-  <ejs-diagram #diagram width="100%" height="600px" [layout]="layout"
-  [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults"
-  [dataSourceSettings]="data" (created)="created()" (wheel)="onWheel($event)" >
+<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
+  <!-- <div [style.background]="'#7286D3'" class="circle"></div>
+  <div class="text">ตำแหน่งหลัก</div>
+  <div [style.background]="'#B9F3FC'" class="circle"></div>
+  <div class="text">ตำแหน่งรอง</div>
+  <div [style.background]="'#F6995C'" class="circle"></div>
+  <div class="text">รักษาการ</div> -->
+  <!-- <div class="rectangletooltip"></div>
+  <div class="text">Matrix Position</div> -->
+  <hr *ngIf="InDirectDescription" class="linetooltip">
+  <div *ngIf="InDirectDescription" class="text">Report to Indirect</div>
+</div>
+<div style="position: relative;">
+  <ejs-diagram #diagram id="diagram" width="100%" height="600px"
+  [layout]="layout"
+  [getConnectorDefaults]="connDefaults"
+  [getNodeDefaults]="nodeDefaults"
+  [dataSourceSettings]="data"
+  (created)="created()"
+  (wheel)="onWheel($event)"
+  [scrollSettings]="scrollSettings"
+  [tool]="tool"
+  [snapSettings]="snapSettings">
   <ng-template #nodeTemplate let-data>
     <ng-container>
-      <div #nodeItem style="border-color: black;border-width: 4px;">
-        <input class="btn btn-outline-info" type="button" (click)="clickToCheck(data)" value="Click Me Here!"/>
+      <div #nodeItem
+      [style.background-color]="data.data.color ?  data.data.color : '#E1F7F5'"
+      style="align-items: center; justify-content: center;border-radius: 25px;border-width: 4px;height: 100%;width: 100%;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;">
+      <div>
+        <div style="display: flex;flex-direction: column;row-gap: 1px;padding: 30px 30px;">
+          <span *ngIf="'unitCodeName' | displayCheck:ShowField" style="font-size: 23px;font-weight: bold;text-align: center;margin-top: 30px;">
+            {{data.data.unitCodeName}}
+          </span>
+         <span *ngIf="'unitCodeNameEn' | displayCheck:ShowField" style="font-size: 23px;font-weight: bold;text-align: center;">
+            {{data.data.unitCodeNameEn}}
+          </span>
+         <span *ngIf=" ('unitCodeCode' | displayCheck:ShowField) || ('shortName'|displayCheck:ShowField)"
+         style="text-align: center;font-size: 23px;">
+          {{data.data.shortName}}  {{data.data.unitCodeCode ? '('+data.data.unitCodeCode+')' : '-'}}
+          </span>
+         <span *ngIf="('topPositionName' | displayCheck:ShowField) || ('topPositionAssignTo' | displayCheck:ShowField)"
+         style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;margin-top: 10px;"><span
+          style="text-align: left;width: 200px;">ชื่อตำแหน่งสูงสุด :</span><span style="text-align: right;flex:1">
+          {{data.data.topPositionName == null && data.data.topPositionAssignTo == null ? '-':  data.data.topPositionName  +' '+ data.data.topPositionAssignTo}} </span> </span>
+         <span *ngIf="'costCenter' | displayCheck:ShowField"style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
+          style="text-align: left;width: 200px;">ศูนย์ต้นทุน :</span><span style="text-align: right;flex:1">
+          {{data.data.costCenter ? data.data.costCenter : '-'}}</span> </span>
+        </div>
+        <div style="justify-content: center;align-items: center;display: flex;">
+          <span
+              style="color:rgb(0, 0, 0);font-size: 15px;display: flex;position: absolute;bottom: 40px;margin-top: 20px;align-items: center;flex-direction: row;column-gap: 50%;white-space: nowrap;justify-content: center;width: 20%;margin-right: 20px;">
+              <span  style="width: 20%;" class="n0" *ngIf="'N1'|displayCheck:ShowField">
+                <span class="n0tooltip">{{Caption.n0}}</span><i
+                      class="fa-duotone fa-users"
+                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
+                  {{data.data.n0 == null || data.data.n0 == 0 ? 0: data.data.n0}} </span>
+              <span  style="width: 20%;" class="n1" *ngIf="'N2'|displayCheck:ShowField">
+                <span class="n1tooltip">{{Caption.n1}}</span><i
+                      class="fa-duotone fa-chair-office"
+                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
+                      {{data.data.n1 == null || data.data.n1 == 0 ? 0: data.data.n1}} </span>
+              <span style="width: 20%; " class="n2" *ngIf="'N3'|displayCheck:ShowField">
+                <span class="n2tooltip">{{Caption.n2}}</span><i
+                      class="fa-duotone fa-user"
+                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
+                      {{data.data.n2 == null || data.data.n2 == 0 ? 0: data.data.n2}} </span>
+              <span  style="width: 20%;"class="n3" *ngIf="'N4'|displayCheck:ShowField">
+                <span class="n3tooltip">{{Caption.n3}}</span><i
+                      class="fa-light fa-chair-office" style="margin-right: 50%;"></i>
+                      {{data.data.n3 == null || data.data.n3 == 0 ? 0: data.data.n3}} </span>
+          </span>
+      </div>
+      <div *ngIf="data.data.child > 0 && ExpandStatus[data.id]">
+        <button  class="btn btn-dark"
+        style="height: 45px;width: 80px;border-radius: 25px;position: absolute;left: 50%;bottom: -20px;transform: translateX(-50%);font-size: 20px;"
+        (click)="Expand(data.id)"><span style="color: white;">{{data.data.child}}
+        </span><span id="arrow"
+            style="margin-left: 2px;display: inline-block;vertical-align: middle;"><i
+                class="fa fa-angle-up"
+                style="font-size:30px;display: inline;color: white;"></i></span></button>
+      </div>
+      <div *ngIf="data.data.child > 0  && ExpandStatus[data.id] == false">
+        <button class="btn btn-secondary"
+            style="height: 45px;width: 80px;border-radius: 25px;position: absolute;left: 50%;bottom: -20px;transform: translateX(-50%);font-size: 20px;"
+            (click)="Expand(data.id)"><span style="color: white;">{{data.data.child}}
+            </span><span id="arrow"
+                style="margin-left: 2px;display: inline-block;vertical-align: middle;"><i
+                    class="fa fa-angle-down"
+                    style="font-size:30px;display: inline;color: white;"></i></span></button>
+    </div>
+      </div>
       </div>
     </ng-container>
   </ng-template>
   </ejs-diagram>
+  <div style="width: 300px;margin-left:15px;top: 15px;background:#f7f7f7;position:absolute;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;">
+    <ejs-overview id="overview" width="100%" height="350px" sourceID="diagram" #overview>
+    </ejs-overview>
 </div>
+</div>
+<ngx-spinner bdColor="rgba(51,51,51,0.8)" size="medium" color="#fff" type="ball-scale-multiple">
+  <p style="font-size: 20px; color: white;">Loading...</p>
+</ngx-spinner>

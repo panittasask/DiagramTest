@@ -1,48 +1,54 @@
 
-<div class="form-group row"     style="top: 20px;position: static;justify-content: center;align-items: center;">
-    <div class="col-sm-2">
-        <input style="margin-left: 15px;" class="btn btn-outline-danger" type="button" id="export" value="export"
-            (click)="ExportOptions()" />
+<div class="form-group row"     style="top: 20px;position: static;justify-content: right;align-items: center;">
+    <div class="col-sm-5">
+
     </div>
-    <div class="col-sm-2">
-        <ng-select [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
-            (change)="selectLevel(listLevel)" [searchable]="true">
-        </ng-select>
+    <div class="col-sm-2 d-flex align-items-center">
+      <label for="level-select" style="margin-right: 8px;">Display Level</label>
+      <ng-select class="flex-grow-1" id="level-select" [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
+          (change)="selectLevel(listLevel)" [searchable]="true">
+      </ng-select>
+  </div>
+    <div class="col-sm-1">
+        <input style="margin-left: 5px;" class="btn btn-outline-success" type="button" id="Expand All"
+            (click)="ExpandAll()" value="Expand All" />
     </div>
-    <div class="col-sm-2">
-        <input style="margin-left: 15px;" class="btn btn-outline-success" type="button" id="ExpandAll"
-            (click)="ExpandAll()" value="ExpandAll" />
+    <div class="col-sm-1">
+        <input style="margin-left: 5px;" class="btn btn-outline-info" type="button" id="Collapse All"
+            (click)="CollapsAll()" value="Collapse All" />
     </div>
-    <div class="col-sm-2">
-        <input style="margin-left: 15px;" class="btn btn-outline-info" type="button" id="CollapsAll"
-            (click)="CollapsAll()" value="CollapsAll" />
-    </div>
+    <div class="col-sm-1">
+      <input style="margin-left: 12px;" class="btn btn-outline-danger" type="button" id="export" value="Export"
+          (click)="ExportOptions()" />
+  </div>
 </div>
-<div style="padding-top: 10px;padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
-  <h2 style="color: white;">{{titleName}}</h2>
-  <h2 style="color: white;">{{titleDesc}}</h2>
+<div style="display: flex;background-color: #1464CC;border-radius: 10px 10px 0 0;justify-content: center; height: 56.4px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
+  <span style="color: white;font-size: 20px;">{{titleName}} {{titleDesc}}</span>
 </div>
-<div style="align-content: center;margin-top: 5px;">
-  <div style="display: flex;flex-direction: row-reverse;white-space: nowrap;column-gap: 40px;font-size: 13px;grid-template-columns: auto auto;">
-  <div>
-      <div class="top-half"></div><span style="margin-left: 50px;">Matrix Position</span>
-  </div>
-  <div>
-      <span class="connectorline"></span><span style="margin-left: 50px;">Report to Indirect</span>
-  </div>
-  </div>
+<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
+  <div [style.background]="'#7286D3'" class="circle"></div>
+  <div class="text">ตำแหน่งหลัก</div>
+  <div [style.background]="'#B9F3FC'" class="circle"></div>
+  <div class="text">ตำแหน่งรอง</div>
+  <div [style.background]="'#F6995C'" class="circle"></div>
+  <div class="text">รักษาการ</div>
+  <div *ngIf="matrixposition" class="rectangletooltip"></div>
+  <div *ngIf="matrixposition" class="text">Matrix Position</div>
+  <hr *ngIf="inDirect" class="linetooltip">
+  <div *ngIf="inDirect" class="text">Report to Indirect</div>
 </div>
 <div style="overflow: hidden;position: relative;">
     <ejs-diagram #diagram id="diagram" width="100%" height="600px" [layout]="layout"
         [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults" [dataSourceSettings]="data"
-        [scrollSettings]="scrollSettings" (created)="created($event)" [snapSettings]="snapSettings" [tool]="tool" (wheel)="onWheel($event)"
-        [pageSettings]="pageSettings" >
+        [scrollSettings]="scrollSettings" (created)="created()" [snapSettings]="snapSettings" [tool]="tool" (wheel)="onWheel($event)"
+        >
         <ng-template #nodeTemplate let-data>
             <!-- {{findingDataVisible(data.data.positionID)}} -->
             <ng-container>
                 <div class="nodeitem" id="nodeitem"
-                    [style.border]="data.data.objectType == 'MatrixPos' ? 'dotted 5px' : 'solid'"
-                    [style.border-color]="data.data.objectType == 'Position' ? data.data.positionLevelColor  : data.data.objectType == 'MatrixPos' ? 'orange' : 'green'"
+                    [style.border]="data.data.objectType == 'MatrixPos' ? 'dashed 7px' : 'solid'"
+                    [style.border-color]="data.data.objectType == 'Position' ? data.data.backgroundColor  : data.data.objectType == 'MatrixPos' ? 'orange' : '#E1F7F5'"
+                    [style.background-color]="data.data.backgroundColor!= null ? data.data.backgroundColor : data.data.objectType == 'Position' ? data.data.backgroundColor: data.data.objectType == 'UnitCode' ? '#E1F7F5' : 'white'"
                     style="height: 100%;  align-items: center; justify-content: center;background-color: white;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
                     border-radius: 20px;width: 100%;
                     color: white;">
@@ -51,88 +57,117 @@
                           <img alt="profile" [src]="data.data.pictureUrl" style="width: 80px; height: 80px; border-radius: 50%; left:50%;transform: translate(-50%, -60%);
                           position: absolute;" />
                             <span
+                                *ngIf="data.data.assignType !=null"
                                 [style.background-color]="data.data.assignType == 'cch_AssignTypePermanent' ? '#7286D3' : data.data.assignType == 'cch_AssignTypeSecondment' ? '#B9F3FC' : data.data.assignType == 'cch_AssignTypeTemporary' ? '#F6995C' : '#E5E0FF'"
                                 class="dotChartDiagram">
                             </span>
                         </div>
                         <div *ngIf="data.data.objectType == 'Position' || data.data.objectType == 'MatrixPos'">
                             <div style="display: flex;flex-direction: column;row-gap: 1px;padding: 30px 30px;margin-top: 20px;">
-                                <span *ngIf="CheckVisible('PersonNameDisplay') || CheckVisible('nickNameDisplay')"
+                                <span *ngIf=" ('PersonNameDisplay'|CheckVisible:isShow) || ('nickNameDisplay'|CheckVisible:isShow )"
                                     style="color: rgb(0, 0, 0); font-size: 20px;font-weight: bold;text-align: center;">{{
                                     data.data.personNameDisplay != null ? data.data.personNameDisplay : '-' }}
                                     {{data.data.nickNameDisplay != null ? '('+ data.data.nickNameDisplay +')' : '-'
                                     }}</span>
-                                <span *ngIf="CheckVisible('personName2Display')"
+                                <span *ngIf="'personName2Display'|CheckVisible:isShow"
                                     style="color: rgb(0, 0, 0); font-size: 20px;text-align: center;font-weight: bold;margin-top: 5px;">{{
                                     data.data.personName2Display != null ? data.data.personName2Display : '-'}}</span>
-                                <span *ngIf="CheckVisible('empCode')"
+
+                                <span *ngIf="'empCode'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 20px;text-align: center;margin-top: 10px;margin-bottom: 10px;">
                                     {{data.data.empCode}} - {{data.data.hiredDateDisplay}}
                                 </span>
+                                <span
+                                *ngIf="data.data.replacementPersonID != null"
+                                style="
+                                  color: red;
+                                  font-size: 15px;
+                                  text-align: center;
+                                  margin-top: 5px;
+                                  margin-bottom: 10px;
+                                "
+                              >
+                                {{ data.data.terminateDateDisplay }}
+                                {{
+                                  data.data.terminateType != null
+                                    ? "(" + data.data.terminateType + ")"
+                                    : "(ไม่ระบุ)"
+                                }}</span
+                              >
                                 <span style="margin-top: 10px;margin-bottom: 10px;"></span>
-                                <span *ngIf="CheckVisible('positionName')"
+
+                                <span *ngIf="'positionName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ตำแหน่ง :</span><span style="text-align: right;">
                                         {{data.data.objectName != null ? data.data.objectName : '-' }}</span> </span>
-                                <span *ngIf="CheckVisible('unitCodeShortName')"
+                                <span *ngIf="'unitCodeShortName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">หน่วยงาน :</span><span style="text-align: right;">
                                         {{data.data.unitCodeName != null ? data.data.unitCodeName +
                                         '('+data.data.unitCodeShortName+'.)' : '-'}} </span> </span>
-                                <span *ngIf="CheckVisible('companyName')"
+
+                                <span *ngIf="'companyName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">บริษัท :</span><span style="text-align: right;">
                                         {{data.data.companyName != null ? data.data.companyName : '-' }}</span> </span>
-                                <span *ngIf="CheckVisible('officeName')"
+
+                                <span *ngIf="'officeName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">สถานที่ปฏิบัติการ :</span><span
                                         style="text-align: right;"> {{data.data.officeName != null ?
                                         data.data.officeName :
                                         '-'}}</span> </span>
-                                <span *ngIf="CheckVisible('personnelGradeName')"
+
+                                <span *ngIf="'personnelGradeName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ระดับถือครอง :</span><span style="text-align: right;">
                                         {{data.data.personnelGradeName != null ?data.data.personnelGradeName :
                                         '-'}}</span>
                                 </span>
-                                <span *ngIf="CheckVisible('positionLevelName')"
+
+                                <span *ngIf="'positionLevelName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ระดับตำแหน่ง :</span><span style="text-align: right;">
                                         {{data.data.positionLevelName != null ? data.data.positionLevelName :
                                         '-'}}</span>
                                 </span>
-                                <span *ngIf="CheckVisible('positionExecutiveName')"
+
+                                <span *ngIf="'positionExecutiveName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ตำแหน่งบริหาร :</span><span
                                         style="text-align: right;">
                                         {{data.data.positionExecutiveName !=null ? data.data.positionExecutiveName :
                                         '-'}}</span> </span>
-                                <span *ngIf="CheckVisible('positionWorkLineName')"
+
+                                <span *ngIf="'positionWorkLineName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ตำแหน่งสายงาน :</span><span
                                         style="text-align: right;">
                                         {{data.data.positionWorkLineName != null ? data.data.positionWorkLineName :
                                         '-'}}</span> </span>
-                                <span *ngIf="CheckVisible('positionRoleName')"
+
+                                <span *ngIf="'positionRoleName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ประเภทตำแหน่ง :</span><span
                                         style="text-align: right;">
                                         {{data.data.positionRoleName != null ? data.data.positionRoleName : '-'}}</span>
                                 </span>
-                                <span *ngIf="CheckVisible('jobFamilyName')"
+                                <span *ngIf="'jobFamilyName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">กลุ่ม Job :</span><span style="text-align: right;">
                                         {{data.data.jobFamilyName != null ? data.data.jobFamilyName :'-'}}</span>
                                 </span>
-                                <span *ngIf="CheckVisible('jobItemName')"
+                                <span *ngIf="'jobItemName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">Job :</span><span style="text-align: right;">
                                         {{data.data.jobItemName != null ? data.data.jobItemName : '-'}}</span> </span>
-                                <span *ngIf="CheckVisible('jobLevelName')"
+
+                                <span *ngIf="'jobLevelName'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ระดับ Job :</span><span style="text-align: right;">
                                         {{data.data.jobLevelName != null ? data.data.jobLevelName : '-'}}</span> </span>
-                                <span *ngIf="CheckVisible('costCenter')"
+
+                                <span *ngIf="'costCenter'|CheckVisible:isShow"
                                     style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                         style="text-align: left;">ศูนย์ต้นทุน :</span><span style="text-align: right;">
                                         {{data.data.costCenter != null ? data.data.costCenter : '-'}}</span> </span>
@@ -148,87 +183,95 @@
                                         " />
                                     </div>
                                 </div>
-                                <div class="col-sm-8" style="text-align: right;">
+                                <div class="col-sm-8" style="text-align: right;padding: 0 30px;">
                                     <div>
                                         <span
                                             style="color: black; font-size: 14px;margin-bottom:5px;font-weight: bold;">{{
-                                            data.data.replacementNickNameDisplay}}</span>
+                                              data.data.replacementPersonNameDisplay != null ? data.data.replacementPersonNameDisplay : '-' }}
+                                              {{data.data.replacementNickNameDisplay != null ? '('+ data.data.replacementNickNameDisplay +')' : '-'
+                                              }}</span>
                                     </div>
                                     <div>
-                                        <span style="color: rgb(86, 86, 86); font-size: 14px;margin-bottom:5px">{{
-                                            data.data.replacementHiredDateDisplay}}</span>
+                                        <span style="color: rgb(0, 0, 0); font-size: 14px;margin-bottom:5px;font-weight: bold;">
+                                          {{
+                                          data.data.replacementPersonName2Display != null ? data.data.replacementPersonName2Display : '-'}}</span>
                                     </div>
                                     <div>
-                                        <span style="color: rgb(151, 148, 148); font-size: 14px;margin-bottom:5px">{{
-                                            data.data.replacementPositionName}}</span>
+                                        <span style="color: rgb(0, 0, 0); font-size: 14px;margin-bottom:5px">
+                                          {{data.data.replacementEmpCode}} - {{data.data.replacementHiredDateDisplay}}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div style="display: flex;flex-direction: column;row-gap: 1px;padding: 30px 30px;">
+                            <div style="display: flex;flex-direction: column;row-gap: 1px;padding: 20px 20px;">
                               <span style="margin-bottom: 10px;"></span>
-                              <span *ngIf="CheckVisible('positionName')"
+                              <span *ngIf="'positionName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ตำแหน่ง :</span><span style="text-align: right;">
                                       {{data.data.replacementObjectName ? data.data.replacementObjectName : '-'}}</span> </span>
-                              <span *ngIf="CheckVisible('unitCodeShortName')"
+
+                              <span *ngIf="'unitCodeShortName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">หน่วยงาน :</span><span style="text-align: right;">
                                       {{data.data.replacementUnitCodeName != null ? data.data.replacementUnitCodeName +
                                       '('+data.data.replacementUnitCodeShortName+'.)' : '-'}} </span> </span>
-                              <span *ngIf="CheckVisible('companyName')"
+
+                              <span *ngIf="'companyName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">บริษัท :</span><span style="text-align: right;">
                                       {{data.data.replacementCompanyName != null ? data.data.replacementCompanyName : '-' }}</span> </span>
-                              <span *ngIf="CheckVisible('officeName')"
+
+                              <span *ngIf="'officeName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">สถานที่ปฏิบัติการ :</span><span
                                       style="text-align: right;"> {{data.data.replacementOfficeName != null ?
                                       data.data.replacementOfficeName :
                                       '-'}}</span> </span>
-                              <span *ngIf="CheckVisible('personnelGradeName')"
+                              <span *ngIf="'personnelGradeName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ระดับถือครอง :</span><span style="text-align: right;">
                                       {{data.data.replacementPersonnelGradeName != null ?data.data.replacementPersonnelGradeName :
                                       '-'}}</span>
                               </span>
-                              <span *ngIf="CheckVisible('positionLevelName')"
+                              <span *ngIf="'positionLevelName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ระดับตำแหน่ง :</span><span style="text-align: right;">
                                       {{data.data.replacementPositionLevelName != null ? data.data.replacementPositionLevelName :
                                       '-'}}</span>
                               </span>
-                              <span *ngIf="CheckVisible('positionExecutiveName')"
+                              <span *ngIf="'positionExecutiveName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ตำแหน่งบริหาร :</span><span
                                       style="text-align: right;">
                                       {{data.data.replacementPositionExecutiveName !=null ? data.data.replacementPositionExecutiveName :
                                       '-'}}</span> </span>
-                              <span *ngIf="CheckVisible('positionWorkLineName')"
+                              <span *ngIf="'positionWorkLineName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ตำแหน่งสายงาน :</span><span
                                       style="text-align: right;">
                                       {{data.data.replacementPositionWorkLineName != null ? data.data.replacementPositionWorkLineName :
                                       '-'}}</span> </span>
-                              <span *ngIf="CheckVisible('positionRoleName')"
+                              <span *ngIf="'positionRoleName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ประเภทตำแหน่ง :</span><span
                                       style="text-align: right;">
                                       {{data.data.replacementPositionRoleName != null ? data.data.replacementPositionRoleName : '-'}}</span>
                               </span>
-                              <span *ngIf="CheckVisible('jobFamilyName')"
+                              <span *ngIf="'jobFamilyName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">กลุ่ม Job :</span><span style="text-align: right;">
                                       {{data.data.replacementJobFamilyName != null ? data.data.replacementJobFamilyName :'-'}}</span>
                               </span>
-                              <span *ngIf="CheckVisible('jobItemName')"
+                              <span *ngIf="'jobItemName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">Job :</span><span style="text-align: right;">
                                       {{data.data.replacementJobItemName != null ? data.data.replacementJobItemName : '-'}}</span> </span>
-                              <span *ngIf="CheckVisible('jobLevelName')"
+
+                              <span *ngIf="'jobLevelName'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ระดับ Job :</span><span style="text-align: right;">
                                       {{data.data.replacementJobLevelName != null ? data.data.replacementJobLevelName : '-'}}</span> </span>
-                              <span *ngIf="CheckVisible('costCenter')"
+
+                              <span *ngIf="'costCenter'|CheckVisible:isShow"
                                   style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
                                       style="text-align: left;">ศูนย์ต้นทุน :</span><span style="text-align: right;">
                                       {{data.data.replacementCostCenter != null ? data.data.replacementCostCenter : '-'}}</span> </span>
@@ -236,32 +279,36 @@
                         </div>
                         <div style="justify-content: center;align-items: center;display: flex;">
                           <span
-                              style="color:rgb(0, 0, 0);font-size: 15px;display: flex;position: absolute;bottom: 40px;margin-top: 20px;align-items: center;flex-direction: row;column-gap: 20%;white-space: nowrap;justify-content: center;width: 30%;">
-                              <span *ngIf="data.data.n0 != null && data.data.n0 != 0" style="width: 30%;"><i
+                              style="color:rgb(0, 0, 0);font-size: 15px;display: flex;position: absolute;bottom: 40px;margin-top: 20px;align-items: center;flex-direction: row;column-gap: 50%;white-space: nowrap;justify-content: center;width: 20%;margin-right: 20px;">
+                              <span  style="width: 20%;" class="n0">
+                                <span class="n0tooltip">Some context1</span><i
                                       class="fa-duotone fa-users"
-                                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 20%;"></i>
-                                  {{data.data.n0}}</span>
-                              <span *ngIf="data.data.n1 != null && data.data.n1 != 0" style="width: 30%;"><i
+                                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
+                                  {{data.data.n0 == null || data.data.n0 == 0 ? 0: data.data.n0}} </span>
+                              <span  style="width: 20%;" class="n1">
+                                <span class="n1tooltip">Some context2</span><i
                                       class="fa-duotone fa-chair-office"
-                                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 20%;"></i>
-                                  {{data.data.n1}}</span>
-                              <span *ngIf="data.data.n2 != null && data.data.n2 != 0" style="width: 30%;"><i
+                                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
+                                      {{data.data.n1 == null || data.data.n1 == 0 ? 0: data.data.n1}} </span>
+                              <span style="width: 20%; " class="n2">
+                                <span class="n2tooltip">Some context3</span><i
                                       class="fa-duotone fa-user"
-                                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 20%;"></i>
-                                  {{data.data.n2}}</span>
-                              <span *ngIf="data.data.n3 != null && data.data.n3 != 0" style="width: 30%;"><i
-                                      class="fa-light fa-chair-office" style="margin-right: 20%;"></i>
-                                  {{data.data.n3}}</span>
+                                      style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;margin-right: 50%;"></i>
+                                      {{data.data.n2 == null || data.data.n2 == 0 ? 0: data.data.n2}} </span>
+                              <span  style="width: 20%;"class="n3">
+                                <span class="n3tooltip">Some context4</span><i
+                                      class="fa-light fa-chair-office" style="margin-right: 50%;"></i>
+                                      {{data.data.n3 == null || data.data.n3 == 0 ? 0: data.data.n3}} </span>
                           </span>
                       </div>
-                        <div *ngIf="data.data.objectType == 'UnitCode'" class="form-group row">
+                        <div *ngIf="data.data.objectType == 'UnitCode'" class="form-group row" >
                             <div
-                                style="height: 300px;display:grid;place-items:center;top: 50%;text-align: center;align-items: center;justify-content: center;">
+                                style="height: 200px;display:grid;place-items:center;top: 50%;text-align: center;align-items: center;justify-content: center;">
                                 <span style="color: rgb(0, 0, 0); font-size: 20px;font-weight: bold;">{{
                                     data.data.objectName}}</span>
                             </div>
                         </div>
-                        <div *ngIf="data.data.child > 0  && CheckValue(data.id)" >
+                        <div *ngIf="data.data.child > 0 && CheckExpandStatus[data.id]">
                           <button class="btn btn-dark"
                               style="height: 45px;width: 80px;border-radius: 25px;position: absolute;left: 50%;bottom: -20px;transform: translateX(-50%);font-size: 20px;"
                               (click)="Expand(data.id)"><span style="color: white;">{{data.data.child}}
@@ -270,7 +317,7 @@
                                       class="fa fa-angle-up"
                                       style="font-size:30px;display: inline;color: white;"></i></span></button>
                       </div>
-                      <div *ngIf="data.data.child > 0  && CheckValue(data.id) == false">
+                      <div *ngIf="data.data.child > 0 && CheckExpandStatus[data.id] == false" >
                           <button class="btn btn-secondary"
                               style="height: 45px;width: 80px;border-radius: 25px;position: absolute;left: 50%;bottom: -20px;transform: translateX(-50%);font-size: 20px;"
                               (click)="Expand(data.id)"><span style="color: white;">{{data.data.child}}
