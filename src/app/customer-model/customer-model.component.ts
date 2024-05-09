@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import { HttpClient } from '@angular/common/http';
 import dataJsonUsing from './Chart.json';
 import chart60node from './Chart60Node.json';
-import orgUnit from './OrgUnit.json';
+import orgUnit from '../../model/Chart/OrgUnitPosition.json';
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
 import {FormControl, FormGroup, ReactiveFormsModule, FormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
@@ -145,6 +145,13 @@ export class CustomerModelComponent implements OnInit {
   public CheckExpandStatus:{[key:string]:boolean}={};
   public inDirect:boolean = false;
   public matrixposition:boolean =false;
+  public ShowField:{[key:string]:boolean}={};
+  public Caption:any={
+    n0:"",
+    n1:"",
+    n2:"",
+    n3:"",
+  }
 
 
 
@@ -538,11 +545,13 @@ public diagramthing(){
         main.isExpanded = true;
       }
     }
-    this.isShow.forEach((x:any) =>{
-      if(this.orgunit.isDisplayColumn.toUpperCase().split('|').includes(x.name.toUpperCase())){
-        x.visible = true;
-      }
+    this.orgunit.isDisplayColumn.toUpperCase().split('|').forEach((x:any)=>{
+      this.ShowField[x] = true;
     })
+    this.Caption.n0 = this.orgunit.n0Caption;
+    this.Caption.n1 = this.orgunit.n1Caption;
+    this.Caption.n2 = this.orgunit.n2Caption;
+    this.Caption.n3 = this.orgunit.n3Caption;
 
     let type = 'org_ReportToInDirect';
     let mat = 'MatrixPos';

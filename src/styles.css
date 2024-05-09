@@ -120,20 +120,41 @@ font-family:  "Poppins","Notosans" !important;
 .n0 .n0tooltip {
 visibility: hidden;
 width: 200px;
-background-color: transparent;
+background-color: #E1E9F2;
 color: black;
 text-align: center;
-border-radius: 6px;
-padding: 10px 10px;
+border-radius: 8px;
+padding: 5px 5px;
 position: absolute;
 z-index: 1;
-bottom: 100%;
-left: 20%;
-margin-left: -60px;
+bottom: 35px;
+left: 1px;
+margin-left: -70px;
 }
 
 .n0:hover .n0tooltip{
   visibility: visible;
+}
+.n0 .n0tooltip:after,.n0 .n0tooltip:before {
+  top:100%;
+  left:50%;
+  border:solid transparent;
+  content:" ";
+  height: 0;
+  width: 0;
+  position: absolute;
+}
+.n0 .n0tooltip:after{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 10px;
+  margin-left: -10px;
+}
+.n0 .n0tooltip:before{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 11px;
+  margin-left: -11px;
 }
 
 
@@ -146,20 +167,41 @@ margin-left: -60px;
 .n1 .n1tooltip {
 visibility: hidden;
 width: 200px;
-background-color: transparent;
+background-color: #E1E9F2;
 color: black;
 text-align: center;
-border-radius: 6px;
-padding: 10px 10px;
+border-radius: 8px;
+padding: 5px 5px;
 position: absolute;
 z-index: 1;
-bottom: 100%;
-left: 20%;
-margin-left: -60px;
+bottom: 35px;
+left: 1px;
+margin-left: -70px;
 }
 
 .n1:hover .n1tooltip{
   visibility: visible;
+}
+.n1 .n1tooltip:after,.n1 .n1tooltip:before {
+  top:100%;
+  left:50%;
+  border:solid transparent;
+  content:" ";
+  height: 0;
+  width: 0;
+  position: absolute;
+}
+.n1 .n1tooltip:after{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 10px;
+  margin-left: -10px;
+}
+.n1 .n1tooltip:before{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 11px;
+  margin-left: -11px;
 }
 
 
@@ -171,20 +213,41 @@ margin-left: -60px;
 .n2 .n2tooltip {
 visibility: hidden;
 width: 200px;
-background-color: transparent;
+background-color: #E1E9F2;
 color: black;
 text-align: center;
-border-radius: 6px;
-padding: 10px 10px;
+border-radius: 8px;
+padding: 5px 5%;
 position: absolute;
 z-index: 1;
-bottom: 100%;
-left: 20%;
-margin-left: -60px;
+bottom: 35px;
+left: 1px;
+margin-left: -70px;
 }
 
 .n2:hover .n2tooltip{
   visibility: visible;
+}
+.n2 .n2tooltip:after,.n2 .n2tooltip:before {
+  top:100%;
+  left:50%;
+  border:solid transparent;
+  content:" ";
+  height: 0;
+  width: 0;
+  position: absolute;
+}
+.n2 .n2tooltip:after{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 10px;
+  margin-left: -10px;
+}
+.n2 .n2tooltip::before{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 11px;
+  margin-left: -11px;
 }
 
 
@@ -196,16 +259,38 @@ margin-left: -60px;
 .n3 .n3tooltip {
 visibility: hidden;
 width: 200px;
-background-color: cyan;
+background-color: #E1E9F2;
 color: black;
 text-align: center;
-border-radius: 6px;
-padding: 10px 10px;
+border-radius: 8px;
+padding: 5px 5px;
 position: absolute;
 z-index: 1;
-bottom: 100%;
-left: 20%;
-margin-left: -60px;
+bottom: 35px;
+left: 1px;
+margin-left: -70px;
+
+}
+.n3 .n3tooltip:after,.n3 .n3tooltip:before {
+  top:100%;
+  left:50%;
+  border:solid transparent;
+  content:" ";
+  height: 0;
+  width: 0;
+  position: absolute;
+}
+.n3 .n3tooltip:after{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 10px;
+  margin-left: -10px;
+}
+.n3 .n3tooltip:before{
+  border-color: transparent;
+  border-top-color: #E1E9F2;
+  border-width: 11px;
+  margin-left: -11px;
 }
 
 .n3:hover .n3tooltip{

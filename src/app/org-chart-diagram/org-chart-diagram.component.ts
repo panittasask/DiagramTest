@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import dataJsonUsing from '../customer-model/Chart.json';
 import chart60node from '../customer-model/Chart60Node.json';
 import orgUnit from '..//customer-model/OrgUnit.json';
-import orgChartData from '../../model/P_Tee3.json';
+import orgChartData from '../../model/Chart/OrgPosition.json';
 import { CheckValuePipe } from '../components/check-value.pipe';
 
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
@@ -145,10 +145,16 @@ export class OrgChartDiagramComponent{
   public orgChartData:any=orgChartData;
   public titleName:any=orgChartData.titleName;
   public titleDesc:any=orgChartData.titleDesc;
-  public ExpandStatus:{[key:string]:boolean}={}
+  public ExpandStatus:{[key:string]:boolean}={};
   public inDirect:boolean = false;
   public matrixposition:boolean =false;
-
+  public ShowField:{[key:string]:boolean}={};
+  public Caption:any={
+    n0:"",
+    n1:"",
+    n2:"",
+    n3:"",
+  }
 
   public data: Object = {
     id: 'positionID',
@@ -458,11 +464,13 @@ padding:{left:100,right:100,top:100,bottom:100} };
 
 
   ngOnInit():void{
-    this.isShow.forEach((x:any) =>{
-      if(this.orgChartData.isDisplayColumn.toUpperCase().split('|').includes(x.name.toUpperCase())){
-        x.visible = true;
-      }
+    this.orgChartData.isDisplayColumn.toUpperCase().split('|').forEach((x:any)=>{
+      this.ShowField[x] = true;
     })
+    this.Caption.n0 = this.orgChartData.n0Caption;
+    this.Caption.n1 = this.orgChartData.n1Caption;
+    this.Caption.n2 = this.orgChartData.n2Caption;
+    this.Caption.n3 = this.orgChartData.n3Caption;
     let type = 'org_ReportToInDirect';
     let mat = 'MatrixPos';
     let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
