@@ -1,21 +1,13 @@
-
-import dataCustomer from '../../customer-model/dataCustomer';
-import {​​​​​​​​ getInstance }​​​​​​​​ from '@syncfusion/ej2-base';
-import jsPDF from 'jspdf';
-import dataJsonUsing from '../../customer-model/Chart.json';
-import chart60node from '../../customer-model/Chart60Node.json';
-import orgUnit from '../../customer-model/OrgUnit.json';
-import orgChartData from '../../../model/Chart/OrgPosition.json';
-import { ChangeDetectorRef, Component, HostListener, ViewChild } from '@angular/core';
-import {NgSelectModule, NgOption} from '@ng-select/ng-select';
+import { ChangeDetectorRef, Component,ViewChild } from '@angular/core';
 import { DataManager } from '@syncfusion/ej2-data';
-import { AnnotationConstraints, ChildArrangement, ConnectionPointOrigin, ConnectorConstraints, Diagram, DiagramComponent, DiagramConstraints, DiagramTools, IExportOptions, LayoutModel, NodeConstraints, NodeModel, Overview, PageSettingsModel, Rect, ScrollSettingsModel, Shape, SnapConstraints, SnapSettingsModel, TreeInfo, ZoomOptions } from '@syncfusion/ej2-angular-diagrams';
-import dataUnit from '../../customer-model/Chart60Node.json';
+import {  ConnectionPointOrigin,  Diagram, DiagramComponent, DiagramConstraints, DiagramTools, IExportOptions, LayoutModel, NodeModel, Overview, PageSettingsModel,  ScrollSettingsModel,  SnapConstraints, SnapSettingsModel, TreeInfo, ZoomOptions } from '@syncfusion/ej2-angular-diagrams';
 import { ConnectorModel, Margin } from '@syncfusion/ej2-angular-charts';
-import { opacity } from 'html2canvas/dist/types/css/property-descriptors/opacity';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { left } from '@popperjs/core';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { DiagramService } from '../../services/diagram.service';
+import { AppComponent } from '../../app.component';
+import { ActivatedRoute } from '@angular/router';
+import { WebserviceService } from '../../services/webservice.service';
 @Component({
   selector: 'app-test-unit',
   templateUrl: './test-unit.component.html',
@@ -25,15 +17,12 @@ export class TestUnitComponent {
   @ViewChild('diagram',{static:true})
   //@ViewChild('overview') el:ElementRef<HTMLImageElement>
   public diagram: DiagramComponent;
+  @ViewChild('topmenu',{static:true}) public topmenu:any;
   @ViewChild('nodeItem',{static:true}) public nodeItem:any;
-  constructor(private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService){}
+  constructor(private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService,private Service:DiagramService,private AppComp:AppComponent,private pathUrl:ActivatedRoute,private WebService:WebserviceService){}
   @ViewChild('overview') public overview:Overview;
   public connectors: ConnectorModel;
-  public customerData: any = dataCustomer;
   public objectItemAdd: object[]
-  public largData:any = dataJsonUsing;
-  public node60:any = chart60node;
-  public orgunit:any = orgUnit;
   public isChild: boolean = false;
   public snapSettings: SnapSettingsModel = {
     constraints:  ~(SnapConstraints.ShowLines)
@@ -46,9 +35,9 @@ export class TestUnitComponent {
   public listLevel:number=2;
   public height:number = 500;
   public width:number = 450;
-  public orgChartData:any=orgChartData;
-  public titleName:any=orgChartData.titleName;
-  public titleDesc:any=orgChartData.titleDesc;
+  public orgChartData:any=[];
+  public titleName:any;
+  public titleDesc:any;
   public CheckExpandStatus:{[key:string]:boolean}={};
   public inDirect:boolean = false;
   public matrixposition:boolean =false;
@@ -62,11 +51,7 @@ export class TestUnitComponent {
 
 
   public data: Object = {
-    id: 'positionID',
-    parentId: 'reportToPositionID',
-    dataSource:new DataManager(this.orgChartData.data),
-    doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
-    }
+
   };
 
   public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity'};
@@ -75,24 +60,16 @@ export class TestUnitComponent {
   }
   public layout: LayoutModel  = {
     type:'HierarchicalTree',
-    connectionDirection:'Auto',
     enableRouting:true,
     enableAnimation:true,
     verticalSpacing: 200,
     horizontalSpacing: 90,
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
-    getLayoutInfo: (node: Node, options: TreeInfo) => {
-      if (!options.hasSubTree) {
-        options.orientation = 'Vertical';
-        options.type = 'Right';
-      }
-    },
   };
 
   public nodeDefaults(obj: any): NodeModel {
     obj.shape = { type: 'HTML' };
-    obj.offsetX = 100;
-    obj.offsetY = 100;
+    obj.width = 500;
     obj.height = 500;
     return obj;
   }
@@ -100,14 +77,11 @@ export class TestUnitComponent {
     connector: any, diagram: Diagram): ConnectorModel {
       connector.targetDecorator.height = 20;
       connector.targetDecorator.width = 20;
-      // connector.connectorSpacing = 30;
       connector.type = 'Orthogonal';
-      // connector.bridgeSpace = 100;
-      connector.constraints = ConnectorConstraints.ReadOnly | ConnectorConstraints.LineRouting ;
       connector.cornerRadius = 10;
       connector.style.fill = '#858383';
       connector.style.strokeColor = '#858383';
-      var getSourceId:any = diagram.nodes.filter((x:any) => x.id == connector.targetID)
+      let getSourceId:any = diagram.nodes.filter((x:any) => x.id == connector.targetID)
       if(getSourceId.length > 0){
         if(getSourceId[0].data.reportToType == "org_ReportToInDirect"){
           connector.style = { strokeWidth: 2, opacity: 1 ,length:'15%' ,strokeDashArray:'5,5',};
@@ -157,6 +131,7 @@ export class TestUnitComponent {
       this.diagram.dataBind();
     this.selectLevel({value:2})
     this.diagram.dataBind();
+    this.topmenu.DiagramLevel = this.levelSearch;
     }, 1000);
 
   }
@@ -179,24 +154,6 @@ export class TestUnitComponent {
     this.spinner.hide();
     }, 500);
 
-  }
-  public changeHeight(){
-    this.spinner.show;
-    this.diagram.nodes.forEach((x:any)=>{
-      x.height = this.height;
-      this.diagram.dataBind();
-    })
-    this.spinner.hide();
-    this.diagram.doLayout();
-  }
-  public changeWidth(){
-    this.spinner.show;
-    this.diagram.nodes.forEach((x:any) =>{
-      x.width = this.width;
-      this.diagram.dataBind();
-    })
-    this.spinner.hide();
-    this.diagram.doLayout();
   }
 
   public findDuplicate(data:any){
@@ -222,7 +179,7 @@ export class TestUnitComponent {
     this.spinner.show();
     let styleSheets = document.styleSheets;
     let htmlData:string = this.diagram.getDiagramContent(styleSheets);
-    const url = 'https://localhost:44301/home/generatedocument';
+    const url = 'http://localhost/ExportApi/home/generatedocument';
     const header = new HttpHeaders({
       'Content-type':'application/json'
     });
@@ -255,11 +212,11 @@ export class TestUnitComponent {
       this.CheckExpandStatus[x.id] = true;
       this.listLevel = this.levelSearch.length;
       this.diagram.dataBind();
-      // this.diagram.doLayout();
     }
   });
   this.spinner.hide();
     },500)
+
 
   }
   CollapsAll(){
@@ -271,37 +228,59 @@ export class TestUnitComponent {
         this.CheckExpandStatus[x.id] = false;
         this.listLevel = this.levelSearch[0].value;
         this.diagram.dataBind();
-        // this.diagram.doLayout();
       }
     })
     this.spinner.hide();
     }, 500);
 
   }
-  ngOnInit(){
+  async ngOnInit(){
+    this.spinner.show();
+    this.topmenu.setMatrixSearch(this.WebService.setMatrixView());
+    await this.Service.setMatrixGroupId();
+    this.WebService.decodeUrl().then(response =>{
+      if(response){
+        this.Service.getPositionChart().subscribe({
+      next:(result:any)=>{
+        this.orgChartData = result;
+        this.titleName = result.titleName;
+        this.titleDesc = result.titleDesc;
+        let type = 'org_ReportToInDirect';
+        let mat = 'MatrixPos';
+        let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
+        if(inDirect.length > 0)
+          this.inDirect = true;
+        let matrix = this.orgChartData.data.filter((x:any)=>x.objectType.toUpperCase() == mat.toUpperCase());
+        if(matrix.length > 0)
+          this.matrixposition = true;
 
-    this.isShow.forEach((x:any) =>{
-      if(this.orgChartData.isDisplayColumn.toUpperCase().split('|').includes(x.name.toUpperCase())){
-        x.visible = true;
+        let ShowData = this.orgChartData.isDisplayColumn.toUpperCase().split('|');
+        ShowData.forEach((x:any)=>{
+          this.ShowField[x] = true;
+        })
+        this.Caption.n0 = this.orgChartData.n0Caption;
+        this.Caption.n1 = this.orgChartData.n1Caption;
+        this.Caption.n2 = this.orgChartData.n2Caption;
+        this.Caption.n3 = this.orgChartData.n3Caption;
+
+        this.data = {
+          id: 'positionID',
+          parentId: 'reportToPositionID',
+          dataSource:new DataManager(this.orgChartData.data),
+          doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
+          }
+        }
+
+        this.topmenu.levelSearch = this.App.setRouting();
+      },
+      error:(err)=>{
+        console.log("Error >>>",err)
       }
     })
-    let type = 'org_ReportToInDirect';
-    let mat = 'MatrixPos';
-    let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
-    if(inDirect.length > 0)
-      this.inDirect = true;
-    let matrix = this.orgChartData.data.filter((x:any)=>x.objectType.toUpperCase() == mat.toUpperCase());
-    if(matrix.length > 0)
-      this.matrixposition = true;
-
-    let ShowData = this.orgChartData.isDisplayColumn.toUpperCase().split('|');
-    ShowData.forEach((x:any)=>{
-      this.ShowField[x] = true;
+      }
     })
-    this.Caption.n0 = this.orgChartData.n0Caption;
-    this.Caption.n1 = this.orgChartData.n1Caption;
-    this.Caption.n2 = this.orgChartData.n2Caption;
-    this.Caption.n3 = this.orgChartData.n3Caption;
+
+
   }
 
   onWheel(event:any){
@@ -317,8 +296,7 @@ export class TestUnitComponent {
   }
 
   public SetDynamicNode(){
-    var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
-    var Height = AllDisplay.length * 35;
+    let Height = Object.keys(this.ShowField).length * 35;
     if(this.orgChartData.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data.replacementPersonID == null){
@@ -326,7 +304,7 @@ export class TestUnitComponent {
           this.diagram.dataBind();
         }
         else{
-          r.height = Height * 1.8;
+          r.height = Height * 2;
           this.diagram.dataBind();
         }
       })
@@ -336,7 +314,7 @@ export class TestUnitComponent {
         r.height = this.orgChartData.boxHeight;
         this.diagram.dataBind();
         }else{
-          r.height = this.orgChartData.boxHeight * 1.8;
+          r.height = this.orgChartData.boxHeight * 2;
           this.diagram.dataBind();
         }
       })
@@ -353,56 +331,4 @@ export class TestUnitComponent {
       })
     }
   }
-
-
-public isShow:any=[
-  {
-    name:'PersonNameDisplay',visible:false
-  },
-  {
-    name:'PersonName2Display',visible:false
-  },
-  {
-    name:'Empcode',visible:false
-  },
-  {
-    name:'NickNameDisplay',visible:false
-  },
-  {
-    name:'CompanyName',visible:false
-  },
-  {
-    name:'OfficeName',visible:false
-  },
-  {
-    name:'PositionName',visible:false
-  },
-  {
-    name:'PersonnelGradeName',visible:false
-  },
-  {
-    name:'HiredDateDisplay',visible:false
-  },
-  {
-    name:'PositionLevelName',visible:false
-  },
-  {
-    name:'JobFamilyName',visible:false
-  },
-  {
-    name:'JobLevelName',visible:false
-  },
-  {
-    name:'UnitCode',visible:false
-  },
-  {
-    name:'MobileNumber2',visible:false
-  },
-  {
-    name:'MobileNumber',visible:false
-  },
-  {
-    name:'BirthDateDisplay',visible:false
-  }
-]
 }

@@ -1,49 +1,5 @@
-<div
-  class="form-group row"
-  style="
-    top: 20px;
-    position: static;
-    justify-content: right;
-    align-items: end;
-  "
->
-<div class="col-sm-7"></div>
+<app-topmenu style="margin-bottom: 50px;" (ChangeMatrix)="ChangeMatrix($event)"  (SelectLevel)="selectLevel($event)" [listLevel]="listLevel" (Expand)="ExpandAll()" (Collapse)="CollapsAll()" (Export)="ExportOptions()"  #topmenu></app-topmenu>
 
-<div class="col-sm-2 d-flex align-items-center">
-  <label for="level-select" style="margin-right: 8px;">Display Level</label>
-  <ng-select class="flex-grow-1" id="level-select" [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
-      (change)="selectLevel(listLevel)" [searchable]="true">
-  </ng-select>
-</div>
-  <div class="col-sm-1">
-    <input
-      class="btn btn-outline-success"
-      type="button"
-      id="ExpandAll"
-      (click)="ExpandAll()"
-      value="Expand All"
-    />
-  </div>
-  <div class="col-sm-1">
-    <input
-      class="btn btn-outline-info"
-      type="button"
-      id="CollapsAll"
-      (click)="CollapsAll()"
-      value="Collapse All"
-    />
-  </div>
-  <div class="col-sm-1">
-    <input
-      style="margin-left: 12px;"
-      class="btn btn-outline-danger"
-      type="button"
-      id="export"
-      value="Export"
-      (click)="ExportOptions()"
-    />
-  </div>
-</div>
 <div
   style=" display: flex;
     background-color: #1464CC;
@@ -58,7 +14,7 @@
 >
   <span style="color: white;font-size: 20px;">{{ titleName }} {{ titleDesc }}</span>
 </div>
-<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
+<div style="flex-wrap: wrap;padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
   <div [style.background]="'#7286D3'" class="circle"></div>
   <div class="text">ตำแหน่งหลัก</div>
   <div [style.background]="'#B9F3FC'" class="circle"></div>
@@ -70,7 +26,7 @@
   <hr *ngIf="inDirect" class="linetooltip">
   <div *ngIf="inDirect" class="text">Report to Indirect</div>
 </div>
-<div style="position: relative;overflow: hidden;">
+<div style="position: relative;">
   <ejs-diagram
     #diagram
     id="diagram"
@@ -511,6 +467,11 @@
                   }}</span
                 >
               </span>
+              <span *ngIf="data.data.matrixPositionGroupName != null"
+                          style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
+                              style="text-align: left;">Matrix Position Group :</span><span style="text-align: right;">
+                              {{data.data.matrixPositionGroupName != null ? data.data.matrixPositionGroupName : '-'}}</span>
+                      </span>
             </div>
             <hr
               *ngIf="data.data.replacementPersonID != null"

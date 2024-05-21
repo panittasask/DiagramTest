@@ -7,13 +7,11 @@ import chart60node from '../customer-model/Chart60Node.json';
 import orgUnit from '..//customer-model/OrgUnit.json';
 import orgChartData from '../../model/Chart/OrgPosition.json';
 import { CheckValuePipe } from '../components/check-value.pipe';
-
+import { DiagramService } from '../services/diagram.service';
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
-import {FormControl, FormGroup, ReactiveFormsModule, FormsModule} from '@angular/forms';
-import {BrowserModule} from '@angular/platform-browser';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Component, ViewEncapsulation, ViewChild, ElementRef, ViewChildren, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, ɵɵtrustConstantResourceUrl, model, } from '@angular/core';
-import { Router } from 'express';
+
 import {
   DiagramComponent,
   DiagramModule,
@@ -96,7 +94,15 @@ import { ConsoleService } from '@ng-select/ng-select/lib/console.service';
 import { notDeepStrictEqual } from 'assert';
 import { RulerSettings } from '@syncfusion/ej2-diagrams/src/diagram/diagram/ruler-settings';
 import { addObjectToGrid } from '@syncfusion/ej2-diagrams/src/diagram/utility/swim-lane-util';
-import { ConnectableObservable } from 'rxjs';
+import { ConnectableObservable, tap } from 'rxjs';
+import { debug, error } from 'console';
+import { request } from 'http';
+import { Margin } from '@syncfusion/ej2-angular-charts';
+import { btoa } from 'buffer';
+import { Buffer } from 'buffer';
+import { WebserviceService } from '../services/webservice.service';
+import { AppComponent } from '../app.component';
+import { ActivatedRoute, Router } from '@angular/router';
 export interface EmployeeInfo {
   Role: string;
   color: string;
@@ -117,10 +123,12 @@ export interface MyObject {
   // changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class OrgChartDiagramComponent{
+export class OrgChartDiagramComponent implements OnInit{
   @ViewChild('diagram')
   public diagram: DiagramComponent;
-  constructor(private http:HttpClient,private spinner:NgxSpinnerService,private cdr: ChangeDetectorRef){
+  @ViewChild('topmenu',{static:true}) public topmenu:any;
+  constructor(private router:ActivatedRoute,private AppComp:AppComponent,private http:HttpClient,private spinner:NgxSpinnerService,private cdr: ChangeDetectorRef,private diagramService:DiagramService,private webService:WebserviceService){
+
 
   }
   public connectors: ConnectorModel;
@@ -142,7 +150,7 @@ export class OrgChartDiagramComponent{
   public width:number = 450;
   public wspaceing:number = 0;
   public hspaceing:number = 0;
-  public orgChartData:any=orgChartData;
+  public orgChartData:any=[];
   public titleName:any=orgChartData.titleName;
   public titleDesc:any=orgChartData.titleDesc;
   public ExpandStatus:{[key:string]:boolean}={};
@@ -155,13 +163,9 @@ export class OrgChartDiagramComponent{
     n2:"",
     n3:"",
   }
-
+  public exCodeTest:any="cmVwb3J0dHlwZT1wb3NpdGlvbmNoYXJ0JnBvc2l0aW9uaWQ9OTI0MjI5YjMtNTdkNC00MzZjLWFhZWMtOWFjNGM1ZWUxYTIxJmVmZmRhdGU9MTcgTWF5IDIwMjQXEQPSX&R=97623";
   public data: Object = {
-    id: 'positionID',
-    parentId: 'reportToPositionID',
-    dataSource:new DataManager(this.orgChartData.data),
-    doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
-    }
+
   };
   public tool: DiagramTools = DiagramTools.ZoomPan;
 public snapSettings: SnapSettingsModel = { constraints:SnapConstraints.None };
@@ -185,39 +189,39 @@ padding:{left:100,right:100,top:100,bottom:100} };
     },
   };
   public nodes :NodeModel[] = [
-    {
-      id:'title',
-      offsetX:150,
-      offsetY:-400,
-      annotations:[{
-        content:`${this.titleName} ${this.titleDesc}`,
-        style:{strokeColor:'none',color:'black',fontSize:90,textWrapping:'NoWrap'}
-      }],
-      excludeFromLayout:true,
-      height:200,
-      width:200,
-    },
-    {
-      id:'descritpion',
-      shape:{type:'HTML',content:
-      `<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
-      <div [style.background]="'#7286D3'" style="background:#7286D3" class="circle"></div>
-      <div class="text">ตำแหน่งหลัก</div>
-      <div [style.background]="'#B9F3FC'" style="background:#B9F3FC" class="circle"></div>
-      <div class="text">ตำแหน่งรอง</div>
-      <div [style.background]="'#F6995C'" style="background:#F6995C" class="circle"></div>
-      <div class="text">รักษาการ</div>
-      <div class="rectangletooltip"></div>
-      <div class="text">Matrix Position</div>
-      <hr class="linetooltip">
-      <div class="text">Report to Indirect</div>
-    </div>`},
-      offsetX:150,
-      offsetY:-100,
-      excludeFromLayout:true,
-      height:200,
-      width:1000,
-    }
+    // {
+    //   id:'title',
+    //   offsetX:150,
+    //   offsetY:-400,
+    //   annotations:[{
+    //     content:`${this.titleName} ${this.titleDesc}`,
+    //     style:{strokeColor:'none',color:'black',fontSize:90,textWrapping:'NoWrap'}
+    //   }],
+    //   excludeFromLayout:true,ngo
+    //   height:200,
+    //   width:200,
+    // },
+    // {
+    //   id:'descritpion',
+    //   shape:{type:'HTML',content:
+    //   `<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
+    //   <div [style.background]="'#7286D3'" style="background:#7286D3" class="circle"></div>
+    //   <div class="text">ตำแหน่งหลัก</div>
+    //   <div [style.background]="'#B9F3FC'" style="background:#B9F3FC" class="circle"></div>
+    //   <div class="text">ตำแหน่งรอง</div>
+    //   <div [style.background]="'#F6995C'" style="background:#F6995C" class="circle"></div>
+    //   <div class="text">รักษาการ</div>
+    //   <div class="rectangletooltip"></div>
+    //   <div class="text">Matrix Position</div>
+    //   <hr class="linetooltip">
+    //   <div class="text">Report to Indirect</div>
+    // </div>`},
+    //   offsetX:150,
+    //   offsetY:-100,
+    //   excludeFromLayout:true,
+    //   height:200,
+    //   width:1000,
+    // }
   ]
 
   public nodeDefaults(obj: any,diagram:DiagramComponent): NodeModel {
@@ -263,10 +267,10 @@ padding:{left:100,right:100,top:100,bottom:100} };
   public created(args:Object): void {
 
     this.spinner.show();
+    // this.diagram.updateData();
+
     setTimeout(()=>{
-      this.diagram.nodes.forEach((x:any)=>{
-        this.ExpandStatus[x.id] = x.isExpanded;
-      })
+
       let AllOffset = [...this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetY)]
       let offsetX = [...this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetX)]
       let xcd = this.findDuplicate(offsetX);
@@ -296,23 +300,21 @@ padding:{left:100,right:100,top:100,bottom:100} };
             }
         })
       }
-        this.SetDynamicNode();
-          this.height = this.diagram.nodes[0]?.height ? this.diagram.nodes[0].height : 500;
-          this.width = this.diagram.nodes[0]?.width ? this.diagram.nodes[0].width : 450;
-      this.selectLevel({value:2},true);
-      const titlenode:any = this.diagram.nodes.find((x:any)=> x.id == 'title');
-      (titlenode as any).visible = false;
-      (titlenode as any).height = 200;
-      (titlenode as any).width = 1000;
-      (titlenode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /2;
-      const descriptionnode:any = this.diagram.nodes.find((x:any)=>x.id =='descritpion');
-      (descriptionnode as any).visible = false;
-      (descriptionnode as any).height = 200;
-      (descriptionnode as any).width = 1000;
-      (descriptionnode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /0.5;
+      this.SetDynamicNode();
+      this.selectLevel({value:2});
+      // const titlenode:any = this.diagram.nodes.find((x:any)=> x.id == 'title');
+      // (titlenode as any).visible = false;
+      // (titlenode as any).height = 200;
+      // (titlenode as any).width = 1000;
+      // (titlenode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /2;
+      // const descriptionnode:any = this.diagram.nodes.find((x:any)=>x.id =='descritpion');
+      // (descriptionnode as any).visible = false;
+      // (descriptionnode as any).height = 200;
+      // (descriptionnode as any).width = 1000;
+      // (descriptionnode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /0.5;
       this.diagram.dataBind();
-      // this.spinner.hide();
-    },500)
+      this.topmenu.DiagramLevel = this.levelSearch;
+    },1000)
 
 
 
@@ -330,10 +332,30 @@ padding:{left:100,right:100,top:100,bottom:100} };
     this.diagram.dataBind();
   }
 
+  public ChangeMatrix(martrixId:string){
+    this.spinner.show();
+    this.diagramService.loadDataWithMatrix(martrixId).subscribe({
+      next:(result:any)=>{
+        this.data = {
+          id: 'positionID',
+          parentId: 'reportToPositionID',
+          dataSource:new DataManager(result.data),
+          doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
+          }
+        }
+        this.diagram.dataBind();
+        this.diagram.clear();
+        this.diagram.refresh();
+        setTimeout(() => {
+          this.spinner.hide();
+        }, 2000);
+
+      }
+    });
+  }
+
   public selectLevel(args:any,isCreated:boolean = false){
-    if(!isCreated){
-      this.spinner.show();
-    }
+    this.spinner.show();
 
     setTimeout(()=>{
 
@@ -380,55 +402,96 @@ padding:{left:100,right:100,top:100,bottom:100} };
 
   }
 
-
   public ExportOptions(){
     this.spinner.show();
-    // this.addTitle();
-    let titleNode:any = this.diagram.nodes.find((x:any)=>x.id == 'title')
-    let tooltopnode:any = this.diagram.nodes.find((x:any)=>x.id == 'descritpion')
-    tooltopnode.visible = true;
-    titleNode.visible = true;
-    let stylesheet = document.styleSheets;
-    let htmlData = this.diagram.getDiagramContent();
-    const url = 'https://localhost:44301/home/generatedocument';
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-    const options = { headers: headers };
-    const requestData = JSON.stringify({ Options: htmlData });
-    titleNode.visible = false;
-    tooltopnode.visible = false;
-    this.http.post(url, requestData, options).subscribe((result:any)=>{
-    var base64Data = result.result;
+    let css = document.styleSheets;
+    let diagramData = this.diagram.getDiagramContent(css);
+              this.diagramService.ExportDiagram(diagramData).subscribe({
+                next:(result)=>{
+                  let base64Data = result.result;
+                  let img = new Image();
+                  img.src = base64Data;
+                  img.onload = ()=>{
+                    let canvas = document.createElement('canvas');
+                    let ctx:any = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+                    let modifiedBase64Data = canvas.toDataURL('image/png');
+                    let link = document.createElement('a');
+                    link.download = 'DataDownload.png';
+                    link.href = modifiedBase64Data;
+                    link.click();
 
-
-      var img = new Image();
-      img.src = base64Data;
-
-
-      img.onload = () => {
-        // Create a canvas element
-        var canvas = document.createElement('canvas');
-        var ctx:any = canvas.getContext('2d');
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      ctx.drawImage(img, 0, 0,  canvas.width ,  canvas.height);
-
-        var modifiedBase64Data = canvas.toDataURL('image/png');
-
-        var link = document.createElement('a');
-        link.download = 'DataDownload.png';
-        link.href = modifiedBase64Data;
-
-        link.click();
-
-    this.spinner.hide();
-    }
-    }
-  );
+                  }
+                },
+                error:(err)=>{
+                  console.log("Error>",err)
+                  this.spinner.hide();
+                },
+                complete:()=>{
+                  this.spinner.hide();
+                }
+              })
   }
+  // public ExportOptions(){
+  //   this.spinner.show();
+  //   // this.addTitle();
+  //   // let titleNode:any = this.diagram.nodes.find((x:any)=>x.id == 'title')
+  //   // let tooltopnode:any = this.diagram.nodes.find((x:any)=>x.id == 'descritpion')
+  //   // tooltopnode.visible = true;
+  //   // titleNode.visible = true;
+  //   let stylesheet = document.styleSheets;
+  //   let htmlData = this.diagram.getDiagramContent();
+  //   const url = 'https://localhost:44301/home/generatedocument';
+  //   const headers = new HttpHeaders({
+  //     'Content-Type': 'application/json'
+  //   });
+  //   const options = { headers: headers };
+  //   const requestData = JSON.stringify({ Options: htmlData });
+  //   // titleNode.visible = false;
+  //   // tooltopnode.visible = false;
+
+  //   this.http.post(url,requestData,options).subscribe({
+  //     next:(result:any)=>{
+  //       var base64Data = result;
+
+  //       var img = new Image();
+  //       img.src = base64Data;
+
+
+  //       img.onload = () => {
+  //         // Create a canvas element
+  //         var canvas = document.createElement('canvas');
+  //         var ctx:any = canvas.getContext('2d');
+
+  //       canvas.width = img.width;
+  //       canvas.height = img.height;
+
+  //       ctx.drawImage(img, 0, 0,  canvas.width ,  canvas.height);
+
+  //         var modifiedBase64Data = canvas.toDataURL('image/png');
+
+  //         var link = document.createElement('a');
+  //         link.download = 'DataDownload.png';
+  //         link.href = modifiedBase64Data;
+
+  //         link.click();
+
+  //     this.spinner.hide();
+  //     }
+  //   },
+  //     error:(err)=>{
+  //       console.log("Error>>",err.message)
+  //       // alert(err.message);
+  //       this.spinner.hide();
+  //     },
+  //     complete:()=>{
+  //       this.spinner.hide();
+  //     }
+  //   })
+
+  // }
 
   ExpandAll(){
     this.spinner.show();
@@ -463,27 +526,71 @@ padding:{left:100,right:100,top:100,bottom:100} };
   }
 
 
-  ngOnInit():void{
-    this.orgChartData.isDisplayColumn.toUpperCase().split('|').forEach((x:any)=>{
-      this.ShowField[x] = true;
+  async ngOnInit(){
+    this.spinner.show();
+    let setSeatch = await this.webService.setMatrixView();
+    console.log("setSearch",setSeatch)
+    this.topmenu.setMatrixSearch(setSeatch);
+    await this.diagramService.setMatrixGroupId();
+    this.webService.decodeUrl().then(response =>{
+    if(response){
+    this.diagramService.getPositionChart().subscribe({
+      next:(result:any)=>{
+        let matrixDropdown=[];
+        matrixDropdown.push({'itemID':"All",'itemName':'All'})
+        result.enumMatrixPositionGroup.forEach((x:any)=>{
+          matrixDropdown.push(x)
+        })
+
+        this.orgChartData = result;
+        this.orgChartData.isDisplayColumn.toUpperCase().split('|').forEach((x:any)=>{
+          this.ShowField[x] = true;
+        })
+        this.Caption.n0 = this.orgChartData.n0Caption;
+        this.Caption.n1 = this.orgChartData.n1Caption;
+        this.Caption.n2 = this.orgChartData.n2Caption;
+        this.Caption.n3 = this.orgChartData.n3Caption;
+        let type = 'org_ReportToInDirect';
+        let mat = 'MatrixPos';
+        let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
+        if(inDirect.length > 0)
+          this.inDirect = true;
+        let matrix = this.orgChartData.data.filter((x:any)=>x.objectType?.toUpperCase() == mat.toUpperCase());
+        if(matrix.length > 0)
+          this.matrixposition = true;
+
+        this.data = {
+          id: 'positionID',
+          parentId: 'reportToPositionID',
+          dataSource:new DataManager(this.orgChartData.data),
+          doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
+          }
+        }
+
+        // this.topmenu.MatrixSearch = (result.enumMatrixPositionGroup);
+        this.topmenu.MatrixSearch = matrixDropdown
+        this.topmenu.levelSearch = this.AppComp.setRouting();
+
+
+
+
+      },
+      error:(err)=>{
+        console.log("Error >>>",err)
+      },
+      complete:()=>{
+
+      }
     })
-    this.Caption.n0 = this.orgChartData.n0Caption;
-    this.Caption.n1 = this.orgChartData.n1Caption;
-    this.Caption.n2 = this.orgChartData.n2Caption;
-    this.Caption.n3 = this.orgChartData.n3Caption;
-    let type = 'org_ReportToInDirect';
-    let mat = 'MatrixPos';
-    let inDirect = this.orgChartData.data.filter((x:any)=>x.reportToType.toUpperCase() ==type.toUpperCase());
-    if(inDirect.length > 0)
-      this.inDirect = true;
-    let matrix = this.orgChartData.data.filter((x:any)=>x.objectType.toUpperCase() == mat.toUpperCase());
-    if(matrix.length > 0)
-      this.matrixposition = true;
+      }
+
+    });
+
   }
 
   public SetDynamicNode(){
-    var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
-    var Height = AllDisplay.length * 35;
+    // var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
+    var Height = Object.keys(this.ShowField).length * 35;
     if(this.orgChartData.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data?.replacementPersonID == null){
@@ -491,7 +598,7 @@ padding:{left:100,right:100,top:100,bottom:100} };
           this.diagram.dataBind();
         }
         else{
-          r.height = Height * 1.7;
+          r.height = Height * 2;
           this.diagram.dataBind();
         }
       })
@@ -501,7 +608,7 @@ padding:{left:100,right:100,top:100,bottom:100} };
         r.height = this.orgChartData.boxHeight;
         this.diagram.dataBind();
         }else{
-          r.height = this.orgChartData.boxHeight * 1.7;
+          r.height = this.orgChartData.boxHeight * 2;
           this.diagram.dataBind();
         }
       })
@@ -518,55 +625,4 @@ padding:{left:100,right:100,top:100,bottom:100} };
       })
     }
   }
-
-public isShow:any=[
-  {
-    name:'PersonNameDisplay',visible:false
-  },
-  {
-    name:'PersonName2Display',visible:false
-  },
-  {
-    name:'Empcode',visible:false
-  },
-  {
-    name:'NickNameDisplay',visible:false
-  },
-  {
-    name:'CompanyName',visible:false
-  },
-  {
-    name:'OfficeName',visible:false
-  },
-  {
-    name:'PositionName',visible:false
-  },
-  {
-    name:'PersonnelGradeName',visible:false
-  },
-  {
-    name:'HiredDateDisplay',visible:false
-  },
-  {
-    name:'PositionLevelName',visible:false
-  },
-  {
-    name:'JobFamilyName',visible:false
-  },
-  {
-    name:'JobLevelName',visible:false
-  },
-  {
-    name:'UnitCode',visible:false
-  },
-  {
-    name:'MobileNumber2',visible:false
-  },
-  {
-    name:'MobileNumber',visible:false
-  },
-  {
-    name:'BirthDateDisplay',visible:false
-  }
-]
 }

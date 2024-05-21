@@ -1,13 +1,16 @@
-import { ChangeDetectorRef, Component, ViewChild, ViewChildren, ViewEncapsulation, viewChild } from '@angular/core';
-import { SnapSettingsModel,ComplexHierarchicalTree, ConnectionPointOrigin, ConnectorConstraints, ConnectorEditing, DataBinding, Diagram, DiagramComponent, DiagramConstraints, DiagramTools, HierarchicalTree, LayoutModel, LineDistribution, LineRouting, NodeModel, SnapConstraints, SnapSettings, ZoomOptions, ScrollSettingsModel, TreeInfo, ConnectorModel, LayoutAnimation } from '@syncfusion/ej2-angular-diagrams';
+import { ChangeDetectorRef, Component, ViewChild,  ViewEncapsulation } from '@angular/core';
+import { SnapSettingsModel, ConnectorConstraints,  DataBinding, Diagram, DiagramComponent,  DiagramTools, HierarchicalTree, LayoutModel, LineDistribution,  NodeModel, SnapConstraints,  ZoomOptions, ScrollSettingsModel,  ConnectorModel, LayoutAnimation } from '@syncfusion/ej2-angular-diagrams';
 import Unit from '../../customer-model/OrgUnit.json';
 import { DataManager } from '@syncfusion/ej2-data';
 import DataPosition from '../../../model/Unit chart_1.json';
-import { threadId } from 'worker_threads';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { data } from '../../../model/P_Tee3.json';
-import item from '../../../model/Chart/UnitOnly.json';
+import { DiagramService } from '../../services/diagram.service';
+import { BehaviorSubject } from 'rxjs';
+import { WebserviceService } from '../../services/webservice.service';
+import { AppComponent } from '../../app.component';
+import { ActivatedRoute } from '@angular/router';
 Diagram.Inject(
   DataBinding,
   HierarchicalTree,
@@ -25,6 +28,7 @@ Diagram.Inject(
 export class OrgPositionComponent {
   @ViewChild('diagram') public diagram:DiagramComponent;
   @ViewChild('nodeTemplate') public node:any;
+  @ViewChild('topmenu') public topmenu:any;
   public titleName:any = Unit.titleName;
   public titleDesc:any =  Unit.titleDesc;
   public dataUnit:any = Unit.data;
@@ -35,7 +39,8 @@ export class OrgPositionComponent {
   public ShowField:{[key:string]:boolean}={};
   public ExpandStatus:{[key:string]:boolean} ={};
   public InDirectDescription:boolean=false;
-  public DataItem:any = item;
+  public DataItem:any = [];
+  private DataLoad = new BehaviorSubject<boolean>(false);
   public Caption:any = {
     n0:"",
     n1:"",
@@ -44,12 +49,10 @@ export class OrgPositionComponent {
   }
 
 
-  constructor(private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService){}
+  constructor(private activeRoute:ActivatedRoute,private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService,private service:DiagramService,private WebService:WebserviceService){}
 
   public data:Object = {
-    id:'unitCodeID',
-    parentId:'parentUnitCodeID',
-    dataSource:new DataManager(this.DataItem.data),
+
   }
   public connDefaults(conn:any,diagram:Diagram):ConnectorModel{
     conn.targetDecorator.shape = 'None';
@@ -85,13 +88,6 @@ export class OrgPositionComponent {
     margin: { top: 20 },
     verticalSpacing:200,
     horizontalSpacing:120,
-  //   getLayoutInfo: (node: Node, tree: TreeInfo) => {
-  //     if (!tree.hasSubTree) {
-  //         tree.orientation = 'Vertical';
-  //         tree.type = 'Right';
-  //     }
-  // }
-    // connectionPointOrigin:ConnectionPointOrigin.SamePoint
   }
   public scrollSettings: ScrollSettingsModel = { scrollLimit: 'Infinity',
   padding:{left:150,right:150,top:150,bottom:200} };
@@ -142,36 +138,64 @@ export class OrgPositionComponent {
         })
       }
       this.selectLevel({value:2});
-      this.spinner.hide();
-    },500)
+      setTimeout(() => {
+      this.topmenu.DiagramLevel = this.levelSearch;
+      }, 1000);
+    },1000)
 
   }
   ngOnInit(){
-    let CheckDisplay = this.DataItem.isDisplayColumn.toUpperCase().split('|');
-    CheckDisplay.forEach((x:any) => {
-      this.ShowField[x] = true;
-    });
+    this.spinner.show();
+    this.WebService.decodeUrl().then(response =>{
+      if(response){
+this.service.getOrganizationUnitChart().subscribe({
+      next:(result:any)=>{
+        this.DataItem = result;
+        this.titleDesc = result.titleDesc;
+        this.titleName = result.titleName;
+        let CheckDisplay = this.DataItem.isDisplayColumn.toUpperCase().split('|');
+        CheckDisplay.forEach((x:any) => {
+          this.ShowField[x] = true;
+        });
 
-    this.DataItem.data.forEach((x:any) =>{
-      let i =0;
-      let filterNode = this.DataItem.data.filter((d:any)=>d.unitCodeID != x.unitCodeID)
-      filterNode.forEach((e:any) => {
-        if(e.parentUnitCodeID == x.unitCodeID){
-          i++;
+        this.DataItem.data.forEach((x:any) =>{
+          let i =0;
+          let filterNode = this.DataItem.data.filter((d:any)=>d.unitCodeID != x.unitCodeID)
+          filterNode.forEach((e:any) => {
+            if(e.parentUnitCodeID == x.unitCodeID){
+              i++;
+            }
+          });
+          x.child = i;
+        })
+        let uppderCase = 'org_UNTReportToIndirect';
+        let inDirectCheck = this.DataItem.data.filter((x:any)=> x.reportToType.toUpperCase() == uppderCase.toUpperCase());
+        if(inDirectCheck.length > 0){
+          this.InDirectDescription = true;
         }
-      });
-      x.child = i;
-    })
-    let uppderCase = 'org_UNTReportToIndirect';
-    let inDirectCheck = this.DataItem.data.filter((x:any)=> x.reportToType.toUpperCase() == uppderCase.toUpperCase());
-    if(inDirectCheck.length > 0){
-      this.InDirectDescription = true;
-    }
 
-    this.Caption.n0 = this.DataItem.n1Caption;
-    this.Caption.n1 = this.DataItem.n2Caption;
-    this.Caption.n2 = this.DataItem.n3Caption;
-    this.Caption.n3 = this.DataItem.n4Caption;
+        this.Caption.n0 = this.DataItem.n1Caption;
+        this.Caption.n1 = this.DataItem.n2Caption;
+        this.Caption.n2 = this.DataItem.n3Caption;
+        this.Caption.n3 = this.DataItem.n4Caption;
+
+
+      },
+      error:(err)=>{
+        console.log("Error >>>",err)
+      },
+      complete:()=>{
+        this.data={
+          id:'unitCodeID',
+          parentId:'parentUnitCodeID',
+          dataSource:new DataManager(this.DataItem.data),
+        }
+        this.topmenu.levelSearch = this.App.setRouting();
+      }
+    })
+      }
+    })
+
   }
 
   public ExpandAll(){
@@ -215,7 +239,6 @@ export class OrgPositionComponent {
         }
         this.diagram.dataBind();
       })
-
     }
     this.spinner.hide();
     },500)
@@ -234,36 +257,23 @@ export class OrgPositionComponent {
   this.http.post(url, requestData, options)
     .subscribe((result:any) => {
       var base64Data = result.result;
-
-      // Create an Image object
       var img = new Image();
-      // Set the src attribute to the base64 data
       img.src = base64Data;
-
-      // When the image is loaded
       img.onload = () => {
-        // Create a canvas element
         var canvas = document.createElement('canvas');
         var ctx:any = canvas.getContext('2d');
-      // Set canvas dimensions.
       canvas.width = img.width;
       canvas.height = img.height;
-      // Draw the image onto the canvas with margins
       ctx.drawImage(img, 0, 0, img.width, img.height);
-        // Convert canvas content to base64 data
         var modifiedBase64Data = canvas.toDataURL('image/png');
-        // Create a link element for downloading
         var link = document.createElement('a');
         link.download = 'diagram.png';
         link.href = modifiedBase64Data;
-
-        // Click the link to trigger download
         link.click();
         this.spinner.hide();
       };
     }, (error) => {
       console.log('error', error);
-      // Handle errors here
     });
 }
 

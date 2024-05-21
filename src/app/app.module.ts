@@ -8,7 +8,6 @@ import { LayoutAnimation, SymbolPaletteAllModule, OverviewAllModule, Hierarchica
 
 import { GridAllModule } from '@syncfusion/ej2-angular-grids';
 import { DiagramModule } from '@syncfusion/ej2-angular-diagrams';
-
 import { ListViewAllModule } from '@syncfusion/ej2-angular-lists';
 
 import { DateRangePickerModule } from '@syncfusion/ej2-angular-calendars';
@@ -27,7 +26,7 @@ import { DropDownButtonModule, SplitButtonModule } from '@syncfusion/ej2-angular
 
 import { ButtonModule, CheckBoxModule, RadioButtonModule } from '@syncfusion/ej2-angular-buttons';
 
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { HttpClient } from '@angular/common/http';
 
@@ -59,20 +58,25 @@ import { AppRoutingModule } from './app-routing.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { TestUnitComponent } from './components/test-unit/test-unit.component';
 import { OrgPositionComponent } from './components/org-position/org-position.component';
-import { TestExportComponent } from './components/test-export/test-export.component';
 import { PipeComponent } from './components/pipe/pipe.component';
 import { CheckValuePipe } from './components/check-value.pipe';
 import { DisplayCheckPipe } from './components/pipe/display-check.pipe';
+import { InterceptorService } from './services/interceptor-service.service';
+import { TopmenuComponent } from './components/topmenu/topmenu.component';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TestUnitModule } from './components/test-unit/test-unit/test-unit.module';
+import { OrgPositionModule } from './components/org-position/org-position/org-position.module';
+import { ShareModule } from '../module/share-module/share-module.module';
 @NgModule({
-  declarations: [AppComponent,CustomerModelComponent,SpinnerLoadingComponent, OrgChartDiagramComponent, TestUnitComponent, OrgPositionComponent, TestExportComponent, PipeComponent, CheckValuePipe, DisplayCheckPipe],
+  declarations: [AppComponent,SpinnerLoadingComponent],
   imports: [
-    AppRoutingModule,RouterLink,RouterOutlet,NgxSpinnerModule,
+    ShareModule,FormsModule,
+    AppRoutingModule,RouterLink,RouterOutlet,
     RouterModule,
     MatProgressSpinnerModule,
     FontAwesomeModule,
     NgbModule,
     ChartAllModule,
-    DiagramModule,
     GridAllModule,
     SymbolPaletteAllModule,
     OverviewAllModule,
@@ -81,7 +85,7 @@ import { DisplayCheckPipe } from './components/pipe/display-check.pipe';
     DateRangePickerModule,
     CheckBoxModule,
     AccumulationChartModule,
-    BrowserModule,
+    BrowserModule,NgSelectModule,
     ToolbarModule,
     DropDownButtonModule,
     UploaderModule,
@@ -98,7 +102,6 @@ import { DisplayCheckPipe } from './components/pipe/display-check.pipe';
     FormsModule,
     ReactiveFormsModule ,
     CommonModule,
-    NgSelectModule,
     MatProgressSpinner,
     HttpClientModule,
     ChartAllModule,
@@ -123,24 +126,17 @@ import { DisplayCheckPipe } from './components/pipe/display-check.pipe';
     SplitButtonModule,
     MultiSelectModule,
     NumericTextBoxModule,
-    TreeViewModule,
+    TreeViewModule,MatTooltipModule,
+    DiagramModule
   ],
   providers: [
+    {
+      provide:HTTP_INTERCEPTORS,
+      useClass:InterceptorService,
+      multi:true,
+    },
     provideAnimationsAsync(),
-    HierarchicalTreeService,
-    MindMapService,
-    RadialTreeService,
-    ComplexHierarchicalTreeService,
-    DataBindingService,
-    SnappingService,
-    PrintAndExportService,
-    BpmnDiagramsService,
-    SymmetricLayoutService,
-    // ConnectorBridgingService,
-    UndoRedoService,
-    DiagramContextMenuService,
-    ConnectorEditingService,
-    LayoutAnimationService,
+
   ],
   bootstrap: [AppComponent]
 })

@@ -36,12 +36,18 @@
   ></iframe
 ></noscript>
 <div hidden id="sync-analytics" data-queue="EJ2 - Angular - Demos"></div>
-  <ng-select [items]="levelSearch" bindLabel="text" placeholder="Select Layout" style="position: absolute;top: 20px;width: 350px;margin-left: 30px;left: 0;"
-      [(ngModel)]="listLevel" (change)="selectLayout(listLevel)" [searchable]="true">
-  </ng-select>
+<div *ngIf="firstPage == true" style="display: flex;position: absolute;top: 20px;justify-content: start;left: 0;margin-left: 20px;">
+  <div class="col-sm-2" style="justify-content: start;">
+    <ng-select  [items]="levelSearch" bindLabel="text" placeholder="Select Layout" style="width: 350px;"
+    [(ngModel)]="listLevel" (change)="selectLayout(listLevel)" [searchable]="true">
+</ng-select>
+  </div>
+</div>
+
 </div>
 <div style="padding: 20px 20px;">
   <router-outlet></router-outlet>
+  <!-- <app-test-unit > </app-test-unit> -->
 </div>
 </body>
 <!-- <body >

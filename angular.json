@@ -7,13 +7,19 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "standalone": false
+          "standalone": false,
+          "skipTests": true
         },
         "@schematics/angular:directive": {
-          "standalone": false
+          "standalone": false,
+          "skipTests": true
         },
         "@schematics/angular:pipe": {
-          "standalone": false
+          "standalone": false,
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "skipTests": true
         }
       },
       "root": "",
@@ -27,7 +33,8 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "src/polyfills.ts"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -57,6 +64,18 @@
             }
           },
           "configurations": {
+            "local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.local.ts"
+                }
+              ]
+            },
             "production": {
               "budgets": [
                 {
@@ -70,7 +89,13 @@
                   "maximumError": "20kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
@@ -87,6 +112,9 @@
             },
             "development": {
               "buildTarget": "fusiondiagram:build:development"
+            },
+            "local":{
+              "buildTarget": "fusiondiagram:build:local"
             }
           },
           "defaultConfiguration": "development"
@@ -102,7 +130,8 @@
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "src/polyfills.ts"
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [

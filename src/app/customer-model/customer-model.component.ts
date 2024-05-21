@@ -1,25 +1,13 @@
 import dataCustomer from './dataCustomer';
-import {​​​​​​​​ getInstance }​​​​​​​​ from '@syncfusion/ej2-base';
-import jsPDF from 'jspdf';
 import { HttpClient } from '@angular/common/http';
-import dataJsonUsing from './Chart.json';
-import chart60node from './Chart60Node.json';
-import orgUnit from '../../model/Chart/OrgUnitPosition.json';
-import {NgSelectModule, NgOption} from '@ng-select/ng-select';
-import {FormControl, FormGroup, ReactiveFormsModule, FormsModule} from '@angular/forms';
-import {BrowserModule} from '@angular/platform-browser';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Component, ViewEncapsulation, ViewChild, ElementRef, ViewChildren, OnInit, ChangeDetectorRef, Pipe,AfterViewInit } from '@angular/core';
-import { Router } from 'express';
+import { Component, ViewEncapsulation, ViewChild, ElementRef, OnInit, ChangeDetectorRef } from '@angular/core';
+
+import { DiagramService } from '../services/diagram.service';
 import {
   DiagramComponent,
-  DiagramModule,
   LineDistribution,
   TreeInfo,
-  PageSettingsModel,
   ScrollSettingsModel,
-  PointModel,
-  IFitOptions,
 } from '@syncfusion/ej2-angular-diagrams';
 import {
   NodeModel,
@@ -32,61 +20,22 @@ import {
   SnapSettingsModel,
   LayoutModel,
   ConnectionPointOrigin,
-  OrthogonalSegmentModel,
-  ChildArrangement,
   LineRouting,
-  DiagramConstraints,
-  PaletteModel,
-  SymbolInfo,
-  MarginModel,
-  IDragEnterEventArgs,
-  ConnectorConstraints,
   ConnectorEditing,
-  StackPanel,
-  Container,
-  ImageElement,
-  TextElement,
-  IGraphObject,
   Rect,
-  TextModel,
-  NodeConstraints,
-  Shadow,
-  ShapeStyleModel,
   IExportOptions,
-  getOppositeDirection,
-  Layout,
-  PrintAndExport,
-  DiagramModel,
   ZoomOptions,
   Overview,
   HierarchicalTree,
-  Shape,
-  AnnotationConstraints,
 } from '@syncfusion/ej2-diagrams';
 import { DataManager } from '@syncfusion/ej2-data';
-import { ChangeEventArgs as NumericChangeEventArgs } from '@syncfusion/ej2-inputs';
-// import * as Data from './diagram-data.json';
 import { ChangeEventArgs as CheckBoxChangeEventArgs } from '@syncfusion/ej2-buttons';
-// import { paletteIconClick } from './script/diagram-common';
-import { ExpandMode } from '@syncfusion/ej2-navigations';
 
-import ModelData from './MogData';
-import { connect } from 'http2';
-import { wrap } from 'module';
-import { FilterSettings, content, setStyleAndAttributes } from '@syncfusion/ej2-angular-grids';
 import Data from './dataObject';
-import { response } from 'express';
-import html2canvas from 'html2canvas';
 import { HttpHeaders } from '@angular/common/http';
-import { runInThisContext } from 'vm';
-import { threadId } from 'worker_threads';
-import { bottom, left, right } from '@popperjs/core';
-import { NgxSpinner, NgxSpinnerService,NgxSpinnerModule } from 'ngx-spinner';
-import { rejects } from 'assert';
-import { error } from 'console';
-import { ConnectableObservable } from 'rxjs';
-import { FitOptions } from '@syncfusion/ej2-diagrams/src/diagram/diagram/page-settings';
-import { consumerBeforeComputation } from '@angular/core/primitives/signals';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { WebserviceService } from '../services/webservice.service';
+import { AppComponent } from '../app.component';
 
 Diagram.Inject(
   DataBinding,
@@ -117,19 +66,17 @@ export interface MyObject {
 })
 export class CustomerModelComponent implements OnInit {
   @ViewChild('diagram',{static:true})
-  //@ViewChild('overview') el:ElementRef<HTMLImageElement>
   public diagram: DiagramComponent;
   @ViewChild('nodeTemplate',{static:false,read:ElementRef}) public nodeTemplate:ElementRef;
-  constructor(private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService){}
+  constructor(private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService,private service:DiagramService,private WebService:WebserviceService){}
   @ViewChild('overview') public overview:Overview;
+  @ViewChild('topmenu') public topmenu:any;
   public connectors: ConnectorModel;
   public customerData: any = dataCustomer;
   public ModelData: any = Data;
   public objectItemAdd: object[];
   public visibleItem: MyObject[] = [];
-  public largData:any = dataJsonUsing;
-  public node60:any = chart60node;
-  public orgunit:any = orgUnit;
+  public orgunit:any = [];
   public isChild: boolean = false;
   public snapSettings: SnapSettingsModel = {
     constraints: SnapConstraints.None
@@ -140,8 +87,8 @@ export class CustomerModelComponent implements OnInit {
   public options: IExportOptions;
   public objectData: object;
   public listLevel:number=2;
-  public titleName:any=orgUnit.titleName;
-  public titleDesc:any=orgUnit.titleDesc;
+  public titleName:any;
+  public titleDesc:any;
   public CheckExpandStatus:{[key:string]:boolean}={};
   public inDirect:boolean = false;
   public matrixposition:boolean =false;
@@ -156,16 +103,7 @@ export class CustomerModelComponent implements OnInit {
 
 
   public data: Object = {
-    id: 'objectID',
-    parentId: 'parentObjectID',
-    // dataSource: new DataManager(this.orgunit),
-    // dataSource:new DataManager(this.largData),
-    dataSource:new DataManager(this.orgunit.data),
-    doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram) => {
-      nodeModel.shape={
-        type:'Basic'
-      }
-    }
+
   };
   public tool: DiagramTools = DiagramTools.ZoomPan;
 
@@ -222,8 +160,7 @@ export class CustomerModelComponent implements OnInit {
     return connector;
   }
   public created(): void {
-    let vm = this;
-    //this.spinner.show();
+    this.spinner.show();
 
     setTimeout(()=>{
       for(const item of this.diagram.nodes){
@@ -242,22 +179,21 @@ export class CustomerModelComponent implements OnInit {
           x.data.levelItem = i+1;
         }
       })
+      this.SetDynamicNode();
       this.diagram.nodes.forEach((x:any)=>{
-        if(x.data.levelItem > 1){
-           //x.isExpanded = false;
-        }
+        // if(x.data.levelItem > 1){
+              //x.isExpanded = false;
+        // }
         if(x.data.objectType == 'UnitCode'){
           x.height = 200;
         }
-        this.SetDynamicNode();
-        this.diagram.dataBind();
-        this.diagram.doLayout();
-      })
-      vm.spinner.hide();
-      this.selectLevel({value:2})
-      this.diagram.dataBind();
 
-    },1000);
+      })
+
+      this.diagram.dataBind();
+      this.topmenu.DiagramLevel = this.levelSearch;
+      this.selectLevel({value:2})
+    },3000);
   }
 
   addTitle(){
@@ -481,15 +417,13 @@ public diagramthing(){
     this.spinner.show();
     setTimeout(() =>{
       this.diagram.nodes.forEach((x:any)=>{
-        if(x.data.child > 0 && x.data.child != undefined && x.isExpanded == false)
-
           x.isExpanded = true;
           this.CheckExpandStatus[x.id] = true;
       })
       let levelSearch:any = this.levelSearch.length;
       this.listLevel = levelSearch;
       this.spinner.hide();
-    },1000)
+    },500)
     // this.diagram.dataBind();
     //this.spinner.hide();
   }
@@ -500,7 +434,7 @@ public diagramthing(){
       this.sendItemToCallaps(this.diagram.nodes)
       let levelSearch:any = this.levelSearch[0];
       this.listLevel = levelSearch.value;
-    }, 1000);
+    }, 500);
 
 
 
@@ -522,102 +456,61 @@ public diagramthing(){
     this.spinner.hide();
 
   }
-
-
-  public CheckVisible(data:any){
-    let findItem = this.isShow.filter((x:any)=>x.name.toUpperCase() == data.toUpperCase());
-    let check = false;
-    if(findItem.length > 0){
-      check = findItem[0].visible
-    }else{
-      check = false;
-    }
-    return check;
-
-  }
   ngOnInit(){
     this.spinner.show();
-    for(let i = 0;i<this.orgunit.data.length;i++){
-      let main:any = this.orgunit.data[i];
-      let child:any = this.orgunit.data.filter((x:any)=> x.parentObjectID == main.objectID);
-      if(child?.length > 0){
-        main.child = child.length;
-        main.isExpanded = true;
+    this.WebService.decodeUrl().then(response =>{
+      if(response){
+        this.service.getOrganizationUnitAndPositionChart().subscribe({
+          next:(result:any)=>{
+            this.orgunit = result;
+            this.titleName = result.titleName;
+            this.titleDesc = result.titleDesc;
+            this.orgunit.data.forEach((x:any)=>{
+              let child = this.orgunit.data.filter((e:any)=> e.parentObjectID == x.objectID)
+              x.totalImmSub = child.length ? child.length : 0;
+            })
+
+            this.orgunit.isDisplayColumn.toUpperCase().split('|').forEach((x:any)=>{
+              this.ShowField[x] = true;
+            })
+            this.Caption.n0 = this.orgunit.n0Caption;
+            this.Caption.n1 = this.orgunit.n1Caption;
+            this.Caption.n2 = this.orgunit.n2Caption;
+            this.Caption.n3 = this.orgunit.n3Caption;
+
+            let type = 'org_ReportToInDirect';
+            let mat = 'MatrixPos';
+            let inDirect = this.orgunit.data.filter((x:any)=>x.reportToType?.toUpperCase() ==type.toUpperCase());
+            if(inDirect.length > 0)
+              this.inDirect = true;
+            let matrix = this.orgunit.data.filter((x:any)=>x.objectType?.toUpperCase() == mat.toUpperCase());
+            if(matrix.length > 0)
+              this.matrixposition = true;
+
+            this.data = {
+              id: 'objectID',
+              parentId: 'parentObjectID',
+              dataSource:new DataManager(this.orgunit.data),
+              doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram) => {
+                nodeModel.shape={
+                  type:'Basic'
+                }
+              }
+            }
+
+            this.topmenu.levelSearch = this.App.setRouting();
+          },
+          error:(err)=>{
+            console.log("Error >>>",err)
+          }
+        })
       }
-    }
-    this.orgunit.isDisplayColumn.toUpperCase().split('|').forEach((x:any)=>{
-      this.ShowField[x] = true;
     })
-    this.Caption.n0 = this.orgunit.n0Caption;
-    this.Caption.n1 = this.orgunit.n1Caption;
-    this.Caption.n2 = this.orgunit.n2Caption;
-    this.Caption.n3 = this.orgunit.n3Caption;
-
-    let type = 'org_ReportToInDirect';
-    let mat = 'MatrixPos';
-    let inDirect = this.orgunit.data.filter((x:any)=>x.reportToType?.toUpperCase() ==type.toUpperCase());
-    if(inDirect.length > 0)
-      this.inDirect = true;
-    let matrix = this.orgunit.data.filter((x:any)=>x.objectType?.toUpperCase() == mat.toUpperCase());
-    if(matrix.length > 0)
-      this.matrixposition = true;
-
   }
 
-  public isShow:any=[
-    {
-      name:'PersonNameDisplay',visible:false
-    },
-    {
-      name:'PersonName2Display',visible:false
-    },
-    {
-      name:'Empcode',visible:false
-    },
-    {
-      name:'NickNameDisplay',visible:false
-    },
-    {
-      name:'CompanyName',visible:false
-    },
-    {
-      name:'OfficeName',visible:false
-    },
-    {
-      name:'PositionName',visible:false
-    },
-    {
-      name:'PersonnelGradeName',visible:false
-    },
-    {
-      name:'HiredDateDisplay',visible:false
-    },
-    {
-      name:'PositionLevelName',visible:false
-    },
-    {
-      name:'JobFamilyName',visible:false
-    },
-    {
-      name:'JobLevelName',visible:false
-    },
-    {
-      name:'UnitCode',visible:false
-    },
-    {
-      name:'MobileNumber2',visible:false
-    },
-    {
-      name:'MobileNumber',visible:false
-    },
-    {
-      name:'BirthDateDisplay',visible:false
-    }
-  ]
 
   public async SetDynamicNode(){
-    let AllDisplay = this.isShow.filter((x:any) => x.visible == true);
-    let Height = AllDisplay.length * 40;
+    let Height = Object.keys(this.ShowField).length * 40;
     if(this.orgunit.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data.objectType != 'UnitCode'){
@@ -629,6 +522,8 @@ public diagramthing(){
             r.height = Height * 1.8;
             this.diagram.dataBind();
           }
+        }else if(r.data.objectType == 'UnitCode'){
+          r.height = 200;
         }
       })
     }else{
@@ -641,6 +536,9 @@ public diagramthing(){
           r.height = this.orgunit.boxHeight * 1.8;
           this.diagram.dataBind();
         }
+      }
+      else if(r.data.objectType == 'UnitCode'){
+        r.height = 200;
       }
       })
     }

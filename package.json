@@ -2,9 +2,12 @@
   "name": "fusiondiagram",
   "version": "0.0.0",
   "scripts": {
+    "local": "ng serve --configuration local NODE_ENV=environment.local",
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --base-href='/CoachAngular/'",
+    "build:prod": "ng build --base-href='/CoachAngular/'",
+    "build:dev": "ng build --watch",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:fusiondiagram": "node dist/fusiondiagram/server/server.mjs"
@@ -46,6 +49,7 @@
     "angular-font-awesome": "^3.1.2",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "buffer": "^6.0.3",
     "dom-to-image": "^2.6.0",
     "express": "^4.19.2",
     "font-awesome": "^4.7.0",
@@ -59,6 +63,7 @@
     "rxjs": "~7.8.0",
     "tether": "^2.0.0",
     "tslib": "^2.3.0",
+    "window": "^4.2.7",
     "zone.js": "^0.14.4"
   },
   "devDependencies": {

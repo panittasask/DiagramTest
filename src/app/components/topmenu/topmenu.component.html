@@ -1,0 +1,28 @@
+<div class="topnav" >
+  <div class="float-left">
+    <ng-select  [items]="levelSearch" bindLabel="text" placeholder="Select Layout" style="min-width: 400px;"
+    [(ngModel)]="listPath" (change)="selectLayout(listPath)" [searchable]="true">
+  </ng-select>
+  </div>
+  <div class="float-right">
+    <div class="matrixPos" *ngIf="SearchMatrixPermission">
+      <label for="matrixPos-select" style="text-wrap: nowrap;">Matrix Search</label>
+      <ng-select id="matrixPos-select" [items]="MatrixSearch" bindLabel="itemName"  bindValue="itemID" placeholder="Select Matrix" [(ngModel)]="matrixvalue" style="min-width: 200px;"
+          (change)="selectMatrix(matrixvalue)" [searchable]="true">
+      </ng-select>
+    </div>
+    <div class="selectLevel" >
+      <label for="level-select" style="text-wrap: nowrap;">Display Level</label>
+      <ng-select id="level-select" [items]="DiagramLevel"  bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel" style="min-width: 150px;"
+          (change)="selectLevel(listLevel)" [searchable]="true">
+      </ng-select>
+    </div>
+      <input  class="btn btn-outline-success col-sm-1" type="button" id="Expand All"
+      (click)="ExpandAll()" value="Expand All" />
+  <input  class="btn btn-outline-info col-sm-1" type="button" id="Collapse All"
+      (click)="CollapsAll()" value="Collapse All" />
+<input  class="btn btn-outline-danger col-sm-1" type="button" id="export" value="Export"
+    (click)="ExportOptions()" />
+
+  </div>
+</div>

@@ -1,29 +1,24 @@
-<div class="form-group row" style="margin-bottom: 20px;float: right;"
-    style="top: 20px;position: static;justify-content: right;align-items: end;">
-    <div class="col-sm-7"></div>
-    <div class="col-sm-2 d-flex align-items-center">
-      <label for="level-select" style="margin-right: 8px;">Display Level</label>
-      <ng-select class="flex-grow-1" id="level-select" [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel"
+<!-- <div class="form-group col-sm-12"
+    style="top: 20px;justify-content: right;align-items: end;display: flex;flex-wrap: wrap;gap: 10px;"
+    >
+    <div class="col-sm-5"></div>
+    <div class="col-sm-3"  style="text-align: center;display: flex;gap: 10px;align-items: center;float: right;justify-content: flex-end;">
+      <label for="level-select" style="text-wrap: nowrap;">Display Level</label>
+      <ng-select id="level-select" [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel" style="width: 200px;"
           (change)="selectLevel(listLevel)" [searchable]="true">
       </ng-select>
-  </div>
-    <div class="col-sm-1">
-        <input  class="btn btn-outline-success" type="button" id="Expand All"
+        <input  class="btn btn-outline-success col-sm-1" type="button" id="Expand All"
             (click)="ExpandAll()" value="Expand All" />
-    </div>
-    <div class="col-sm-1">
-        <input  class="btn btn-outline-info" type="button" id="Collapse All"
+        <input  class="btn btn-outline-info col-sm-1" type="button" id="Collapse All"
             (click)="CollapsAll()" value="Collapse All" />
-    </div>
-    <div class="col-sm-1">
-      <input style="margin-left: 12px;" class="btn btn-outline-danger" type="button" id="export" value="Export"
+      <input  class="btn btn-outline-danger col-sm-1" type="button" id="export" value="Export"
           (click)="ExportOptions()" />
-  </div>
-</div>
+</div> -->
+<app-topmenu style="margin-bottom: 50px;" (SelectLevel)="selectLevel($event)" [listLevel]="listLevel" (Expand)="ExpandAll()" (Collapse)="CollapsAll()" (Export)="ExportOptions()"  #topmenu></app-topmenu>
 <div style="display: flex;background-color: #1464CC;border-radius: 10px 10px 0 0;justify-content: center; height: 56.4px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
   <span style="color: white;font-size: 20px;">{{titleName}} {{titleDesc}}</span>
 </div>
-<div style="padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
+<div style="flex-wrap: wrap;padding-right: 20px;position: relative;width: 100%;height: 50px;background-color: transparent;display: flex;justify-content: flex-end;gap: 20px;align-items: center;">
   <div [style.background]="'#7286D3'" class="circle"></div>
   <div class="text">ตำแหน่งหลัก</div>
   <div [style.background]="'#B9F3FC'" class="circle"></div>
@@ -46,7 +41,7 @@
                   [style.border]="data.data.objectType == 'MatrixPos' ? 'dashed 4px' : 'solid'"
                   [style.border-color]="data.data.objectType == 'MatrixPos' ? 'black' : 'white'"
                   style="align-items: center; justify-content: center;background-color: white;height: 100%;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-                  border-radius: 20px;width: 100%;
+                  border-radius: 20px;
                   color: white;">
                   <div style="display: flex; flex-direction: column;">
                       <img alt="profile" [src]="data.data.pictureUrl" style="width: 80px; height: 80px; border-radius: 50%; left:50%;transform: translate(-50%, -60%);
@@ -160,6 +155,11 @@
                                       style="--fa-primary-color: #223941; --fa-secondary-color: #1a57c1;"></i></span><span
                                   style="text-align: right;"> {{data.data.birthDateDisplay != null ?
                                   data.data.birthDateDisplay : '-'}}</span> </span>
+                          <span *ngIf="data.data.matrixPositionGroupName != null"
+                          style="color:rgb(0, 0, 0);font-size: 15px;display: flex;justify-content: space-between;"><span
+                              style="text-align: left;">Matrix Position Group :</span><span style="text-align: right;">
+                              {{data.data.matrixPositionGroupName != null ? data.data.matrixPositionGroupName : '-'}}</span>
+                      </span>
                       </div>
                       <hr  *ngIf="data.data.replacementPersonID != null" style="margin: 0 auto !important;border: 5 !important;width: 90% !important;background-color:rgb(0, 0, 0) !important;height: 2px !important;opacity: 1 !important;">
                       <div *ngIf="data.data.replacementPersonID != null" class="row" style="margin-top: 20px;height: 100%;">
