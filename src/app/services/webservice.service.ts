@@ -15,11 +15,29 @@ import { GlobalComponents } from '../global-components';
   providedIn: 'root'
 })
 export class WebserviceService {
+  gateway = GlobalComponents.APP_GATEWAY_URL;
   public model:{[key:string]:string}={};
   public orgActive:{[key:string]:boolean}={};
   public menu:[]=[];
-  constructor(private router:Router,private activeRoute:ActivatedRoute,private storage:LocalStorageService) { }
+  constructor(private router:Router,private activeRoute:ActivatedRoute,private storage:LocalStorageService,private http:HttpClient) { }
 
+
+
+  GetToken(){
+    const url = `${this.gateway}/auth/Token`;
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded'
+    });
+    let body = new URLSearchParams();
+    body.set('username','admin')
+    body.set('password','123456')
+    const options = { headers: headers };
+    return this.http.post(
+      url,
+      body.toString(),
+      options
+    )
+  }
   decodeUrl(){
     let routerUrl = this.router.url;
 

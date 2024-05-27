@@ -217,8 +217,8 @@ export class AppComponent {
       }
 
     })
-    if(this.session.getItem('token') == null || this.session.getItem('token') == undefined){
-      this.GetToken().subscribe({
+
+    this.GetToken().subscribe({
       next:(x:any)=>
     {
       this.session.saveToken(x.access_token)
@@ -230,8 +230,6 @@ export class AppComponent {
     },
     }
     );
-    }
-
 
   }
 
