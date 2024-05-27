@@ -217,20 +217,21 @@ export class AppComponent {
       }
 
     })
-
-    this.GetToken().subscribe({
-      next:(x:any)=>
-    {
-      this.session.saveToken(x.access_token)
-    },
-    error:(x:any)=>{
-      console.log("Error",x)
-    },
-    complete:()=> {
-    },
-    }
-    );
-
+    if(window.sessionStorage.getItem('token') === null && window.sessionStorage.getItem('token') === undefined)
+      {
+        this.GetToken().subscribe({
+          next:(x:any)=>
+        {
+          this.session.saveToken(x.access_token)
+        },
+        error:(x:any)=>{
+          console.log("Error",x)
+        },
+        complete:()=> {
+        },
+        }
+        );
+      }
   }
 
 
