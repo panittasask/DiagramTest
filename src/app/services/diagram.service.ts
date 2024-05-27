@@ -6,7 +6,6 @@ import { DOCUMENT } from '@angular/common';
 import { Observable } from 'rxjs';
 import { WebserviceService } from './webservice.service';
 import { ActivatedRoute } from '@angular/router';
-import { Matrix3D } from '@syncfusion/ej2-angular-charts';
 import { rejects } from 'assert';
 
 const httpOptions = {
@@ -28,13 +27,16 @@ export class DiagramService {
   }
   private gateway = GlobalComponents.APP_GATEWAY_URL;
   matrixGroupId:string='';
+  matrixMode:string='';
   // token = window.sessionStorage.getItem('token');
 
   setMatrixGroupId(){
     return new Promise((resolve,rejects)=>{
-      this.active.queryParams.subscribe(params=>{
+      this.active.queryParams.subscribe((params:any)=>{
         let matrixId = params['s']
+        let martirxMode = params['m']
         this.matrixGroupId = matrixId == "true" ? "All":"";
+        this.matrixMode = martirxMode == "true" ? "Matrix":"Normal";
         resolve(true);
       })
     })
@@ -50,7 +52,7 @@ export class DiagramService {
     data = {
       "positionID": model['positionid'],
       "effectiveDate": model['effdate'],
-      "displayMode": this.matrixGroupId == 'All' ? "OrgChart-AllMatrixGroup" : "OrgChart",
+      "displayMode": this.matrixGroupId == 'All' && this.matrixMode == "Matrix" ? "OrgChart-SpecifyMatrixGroup" : this.matrixGroupId == '' && this.matrixMode == "Matrix" ? "OrgChart-AllMatrixGroup" : "OrgChart" ,
       "MatrixGroupID":this.matrixGroupId,
     }
     headers = new HttpHeaders({
@@ -65,7 +67,6 @@ export class DiagramService {
     const model = this.webService.model;
     let data;
     let headers;
-    this.setMatrixGroupId().then(response=>{
        data = {
         "unitCodeID": model['unitcodeid'],
         "effectiveDate":  model['effdate'],
@@ -75,8 +76,6 @@ export class DiagramService {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       });
-
-    })
     return this.http.post(url,data,{headers:headers});
   }
 
@@ -105,7 +104,7 @@ export class DiagramService {
     const data = {
       "positionID": model['positionid'],
       "effectiveDate": model['effdate'],
-      "displayMode": "OrgChart",
+      "displayMode": this.matrixGroupId == 'All' && this.matrixMode == "Matrix" ? "OrgChart-SpecifyMatrixGroup" : this.matrixGroupId == '' && this.matrixMode == "Matrix" ? "OrgChart-AllMatrixGroup" : "OrgChart" ,
       "MatrixGroupID":this.matrixGroupId,
     }
     const headers = new HttpHeaders({

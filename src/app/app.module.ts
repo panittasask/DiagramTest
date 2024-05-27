@@ -68,9 +68,9 @@ import { TestUnitModule } from './components/test-unit/test-unit/test-unit.modul
 import { OrgPositionModule } from './components/org-position/org-position/org-position.module';
 import { ShareModule } from '../module/share-module/share-module.module';
 @NgModule({
-  declarations: [AppComponent,SpinnerLoadingComponent],
+  declarations: [AppComponent],
   imports: [
-    ShareModule,FormsModule,
+    ShareModule,FormsModule,NgxSpinnerModule,
     AppRoutingModule,RouterLink,RouterOutlet,
     RouterModule,
     MatProgressSpinnerModule,
@@ -127,7 +127,7 @@ import { ShareModule } from '../module/share-module/share-module.module';
     MultiSelectModule,
     NumericTextBoxModule,
     TreeViewModule,MatTooltipModule,
-    DiagramModule
+    DiagramModule,
   ],
   providers: [
     {

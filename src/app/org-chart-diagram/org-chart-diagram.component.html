@@ -31,7 +31,7 @@
     #diagram
     id="diagram"
     width="100%"
-    height="600px"
+    height="800px"
     [layout]="layout"
     [dataSourceSettings]="data"
     [getConnectorDefaults]="connDefaults"
@@ -974,33 +974,15 @@
     </ng-template>
   </ejs-diagram>
 
-  <div
-    style="
-      align-content: center;
-      width: 25%;
-      height: 30%;
-      margin-left: 10px;
-      position: absolute;
-      top: 10px;
-      background: #f7f7f7;
-      box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    "
-  >
+  <div style="width: 300px;margin-left:15px;top: 15px;background:#f7f7f7;position:absolute;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;">
     <ejs-overview
       id="overview"
-      width="50%"
-      height="200px"
+      width="25%"
+      height="300px"
       sourceID="diagram"
       #overview
     >
     </ejs-overview>
   </div>
 </div>
-<ngx-spinner
-  bdColor="rgba(51,51,51,0.8)"
-  size="medium"
-  color="#fff"
-  type="ball-scale-multiple"
->
-  <p style="font-size: 20px; color: white">Loading...</p>
-</ngx-spinner>
+<spinner-loading #spinner></spinner-loading>

@@ -1,6 +1,6 @@
 import dataCustomer from './dataCustomer';
 import { HttpClient } from '@angular/common/http';
-import { Component, ViewEncapsulation, ViewChild, ElementRef, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ViewEncapsulation, ViewChild, ElementRef, OnInit, ChangeDetectorRef, viewChild } from '@angular/core';
 
 import { DiagramService } from '../services/diagram.service';
 import {
@@ -27,6 +27,7 @@ import {
   ZoomOptions,
   Overview,
   HierarchicalTree,
+  NodeConstraints,
 } from '@syncfusion/ej2-diagrams';
 import { DataManager } from '@syncfusion/ej2-data';
 import { ChangeEventArgs as CheckBoxChangeEventArgs } from '@syncfusion/ej2-buttons';
@@ -36,6 +37,8 @@ import { HttpHeaders } from '@angular/common/http';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { WebserviceService } from '../services/webservice.service';
 import { AppComponent } from '../app.component';
+import { resolveObjectURL } from 'buffer';
+import { getMatTooltipInvalidPositionError } from '@angular/material/tooltip';
 
 Diagram.Inject(
   DataBinding,
@@ -65,10 +68,11 @@ export interface MyObject {
   encapsulation: ViewEncapsulation.None,
 })
 export class CustomerModelComponent implements OnInit {
+  @ViewChild('spinner',{static:true}) public spinner:any;
   @ViewChild('diagram',{static:true})
   public diagram: DiagramComponent;
   @ViewChild('nodeTemplate',{static:false,read:ElementRef}) public nodeTemplate:ElementRef;
-  constructor(private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService,private service:DiagramService,private WebService:WebserviceService){}
+  constructor(private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private service:DiagramService,private WebService:WebserviceService){}
   @ViewChild('overview') public overview:Overview;
   @ViewChild('topmenu') public topmenu:any;
   public connectors: ConnectorModel;
@@ -87,8 +91,8 @@ export class CustomerModelComponent implements OnInit {
   public options: IExportOptions;
   public objectData: object;
   public listLevel:number=2;
-  public titleName:any;
-  public titleDesc:any;
+  public titleName:any = this.orgunit.titleName;
+  public titleDesc:any = this.orgunit.titleDesc;
   public CheckExpandStatus:{[key:string]:boolean}={};
   public inDirect:boolean = false;
   public matrixposition:boolean =false;
@@ -117,28 +121,36 @@ export class CustomerModelComponent implements OnInit {
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
     getLayoutInfo: (node: Node, options: TreeInfo) => {
       if (!options.hasSubTree) {
-        options.orientation = 'Vertical';
-        options.type = 'Right';
+        // options.orientation = 'Vertical';
+        // options.type = 'Right';
       }
     },
   };
 
   public nodeDefaults(obj: any): NodeModel {
-    // obj.constraints = NodeConstraints.Default & ~(  NodeConstraints.Inherit | NodeConstraints.Select);
-    // obj.constraints = NodeConstraints.InConnect;
-    obj.shape = { type: 'HTML' };
-    obj.width = 500;
-    obj.height = 600;
+    // if(obj.id == 'title'){
+    //   obj.width = 500;
+    //   obj.shape = { type: 'text' }
+    // }
+    // else{
+      obj.shape = { type: 'HTML' };
+      obj.width = 500;
+      if(obj.data.objectType == "UnitCode"){
+        obj.height = 200;
+      }else{
+        obj.height = 600;
+      }
+    // }
+
     return obj;
   }
+  public nodes :NodeModel[] =[
+
+  ]
+
   public connDefaults(
     connector: any, diagram: Diagram): ConnectorModel {
-    // connector.targetDecorator.height = 120;
-    // connector.targetDecorator.width = 120;
     connector.type = 'Orthogonal';
-    // connector.constraints = ConnectorConstraints.ReadOnly | ConnectorConstraints.LineRouting;
-    // connector.constraints = ConnectorConstraints.LineRouting;
-    //connector.constraints = 0;
     connector.cornerRadius = 8;
     connector.style.fill = '#858383';
     connector.style.strokeColor = '#858383';
@@ -160,67 +172,37 @@ export class CustomerModelComponent implements OnInit {
     return connector;
   }
   public created(): void {
-    this.spinner.show();
-
-    setTimeout(()=>{
-      for(const item of this.diagram.nodes){
-        this.updateCheckValue(item.id)
-      }
-      let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
-      let cd = this.findDuplicate(AllOffset);
-      let arrObj:any=[];
-      for(let i = 1 ;i < cd.length +1;i++){
-        arrObj.push({value:i})
-      }
-      this.levelSearch=[...arrObj];
-      for(let i=0;i<cd.length;i++)
-      this.diagram.nodes.forEach((x:any)=>{
-        if(cd[i] == x.offsetY){
-          x.data.levelItem = i+1;
+    try{
+      this.spinner.show();
+      setTimeout(()=>{
+        let AllOffset = this.diagram.nodes.map((x:any)=>x.offsetY)
+        let cd = this.findDuplicate(AllOffset);
+        let arrObj:any=[];
+        for(let i = 1 ;i < cd.length +1;i++){
+          arrObj.push({value:i})
         }
-      })
-      this.SetDynamicNode();
-      this.diagram.nodes.forEach((x:any)=>{
-        // if(x.data.levelItem > 1){
-              //x.isExpanded = false;
-        // }
-        if(x.data.objectType == 'UnitCode'){
-          x.height = 200;
-        }
+        this.levelSearch=[...arrObj];
+        for(let i=0;i<cd.length;i++)
+        this.diagram.nodes.forEach((x:any)=>{
+          if(cd[i] == x.offsetY){
+            x.data.levelItem = i+1;
+          }
+        })
+        this.topmenu.DiagramLevel = this.levelSearch;
+        this.topmenu.listLevel = this.levelSearch.length;
+        this.SetDynamicNode();
+        this.selectLevel({value:this.levelSearch.length})
 
-      })
-
-      this.diagram.dataBind();
-      this.topmenu.DiagramLevel = this.levelSearch;
-      this.selectLevel({value:2})
-    },3000);
-  }
-
-  addTitle(){
-    let titleName = this.titleName;
-    let titleDesc = this.titleDesc;
-    let node:NodeModel = {
-      id:'title',
-      offsetX:0,
-      offsetY:-1500,
-      style:{
-        fill:'black',
-        strokeColor:'green',
-      },
-      shape:{
-        type:'HTML',
-        content:`<div style="padding-bottom: 10px;background-color: #8ACDD7;border-radius: 25px 25px 0 0;justify-content: center; height: 100%;width:100%;align-items: center;text-align: center;vertical-align: center;"><h2 style="color: white;font-size:100px;margin-top:100px">${titleName}</h2><h2 style="color: white;font-size:100px;margin-top:150px">${titleDesc}</h2></div>`
-      }
+        this.diagram.height = window.innerHeight-120;
+        this.diagram.dataBind();
+        this.CenterNode();
+        // titleNode.offsetX = this.diagram.scrollSettings.viewPortWidth ? this.diagram.scrollSettings.viewPortWidth * 2: window.innerWidth * 2;
+        // this.diagram.add(titleNode);
+      },1000);
+    }catch(err){
+      console.log("Error",err)
     }
-    this.diagram.add(node);
-    let nodetitle:any = this.diagram.nodes.find((x:any)=> x.id == 'title')
-    let width:any = document.getElementById('diagram')?.offsetWidth;
-    nodetitle.width = width*17;
-    nodetitle.height = 700;
   }
-
-
-
 
   onWheel(event:any){
     let Zoom:ZoomOptions;
@@ -230,8 +212,7 @@ export class CustomerModelComponent implements OnInit {
     }else{
       Zoom = { type:'ZoomOut',zoomFactor:0.1};
     }
-    this.diagram.zoomTo(Zoom)
-    this.diagram.fitToPage();
+    this.diagram.zoomTo(Zoom);
     this.diagram.dataBind();
   }
 
@@ -252,9 +233,9 @@ export class CustomerModelComponent implements OnInit {
         this.diagram.dataBind();
       })
     }
+    this.CenterNode();
     this.spinner.hide();
     },1000)
-
   }
 
   public findDuplicate(data:any){
@@ -268,76 +249,6 @@ export class CustomerModelComponent implements OnInit {
     return selectData;
   }
 
-  public countChild(){
-    for(var i = 0;i < this.diagram.nodes.length;i++){
-        let main:any = this.diagram.nodes[i];
-        let child:any = this.diagram.nodes.filter((x:any)=>x.data.reportToPositionID == main.data.positionID);
-        if(child.length > 0){
-          main.data.child = child.length;
-        }
-    }
-    // this.diagram.dataBind();
-  }
-  public toCenter(){
-        let bound = new Rect(200, 400, 500, 400);
-        this.diagram.bringIntoView(bound);
-  }
-
-  public ZoomOut(){
-    let ZoomOptions:ZoomOptions={
-      type:"ZoomOut",
-      zoomFactor:0.1,
-    }
-    this.diagram.zoomTo(ZoomOptions)
-  }
-  public matchingNodes: any;
-  public currentIndex: number;
-
-  public search(input: any) {
-
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.matchingNodes[this.currentIndex].style.strokeColor = 'black';
-      this.matchingNodes[this.currentIndex].style.strokeWidth = 1;
-    }
-    const searchText = (document.getElementById('searchBox') as any).value
-      .replace(/\s+/g, '')
-      .toLowerCase();
-    const searchWords = searchText.split(/\s+/);
-    const searchRegex = new RegExp(
-      searchWords.map((word: any) => `\\b${word}\\b`).join('.*'),
-      'i'
-    );
-    this.matchingNodes = [];
-    this.currentIndex = 0;
-    this.diagram.clearSelection();
-
-    if (searchText !== '') {
-      this.matchingNodes = this.diagram.nodes.filter((node) => {
-        if (
-          searchRegex.test((node.data as any).Type.replace(/\s+/g, '').toLowerCase()) || (node.data as any).Type.toLowerCase().includes(searchText)
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      });
-      if (this.matchingNodes && this.matchingNodes.length > 0) {
-        this.diagram.select([this.matchingNodes[this.currentIndex]]);
-      }
-    } else {
-      this.matchingNodes = [];
-    }
-
-  }
-
-  public next() {
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.diagram.clearSelection();
-      this.currentIndex = (this.currentIndex + 1) % this.matchingNodes.length;
-      this.diagram.select([this.matchingNodes[this.currentIndex]]);
-    }
-
-  }
   public updateCheckValue(id:any){
     this.CheckExpandStatus[id] = this.CheckValue(id);
   }
@@ -347,67 +258,44 @@ export class CustomerModelComponent implements OnInit {
     return Nodes[0].isExpanded;
   }
 
-  public previous() {
-    if (this.matchingNodes && this.matchingNodes.length > 0) {
-      this.diagram.clearSelection();
-      this.currentIndex =
-        (this.currentIndex - 1 + this.matchingNodes.length) %
-        this.matchingNodes.length;
-      this.diagram.select([this.matchingNodes[this.currentIndex]]);
-    }
+  public CenterNode(){
+    let firstNode:any = this.diagram.nodes;
+    this.diagram.bringToCenter(firstNode[0]?.wrapper?.bounds)
   }
 
-public FitJINGJING(){
-  this.diagram.fitToPage();
-
-}
-public diagramthing(){
-  this.diagram.dataBind();
-  this.diagram.doLayout();
-}
-  public ExportOptions(){
-
-    this.spinner.show();
+  ExportOptions(){
+    try{
+    let vm = this;
+    this.spinner.show('Export in progress...');
     // this.addTitle();
+    // this.showTitleNode();
     let stylesheet = document.styleSheets;
-    let htmlData = this.diagram.getDiagramContent();
-    const url = 'https://localhost:44301/home/generatedocument';
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-    const options = { headers: headers };
-    const requestData = JSON.stringify({ Options: htmlData });
-
-    this.http.post(url, requestData, options).subscribe((result:any)=>{
-    var base64Data = result.result;
-
-
-      var img = new Image();
-      img.src = base64Data;
-
-
-      img.onload = () => {
-        // Create a canvas element
-        var canvas = document.createElement('canvas');
-        var ctx:any = canvas.getContext('2d');
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      ctx.drawImage(img, 0, 0,  canvas.width ,  canvas.height);
-
-        var modifiedBase64Data = canvas.toDataURL('image/png');
-
-        var link = document.createElement('a');
-        link.download = 'DataDownload.png';
-        link.href = modifiedBase64Data;
-
-        link.click();
-
+    let htmlData =  this.diagram.getDiagramContent(stylesheet);
+    // this.hideTitleNode();
+    this.service.ExportDiagram(htmlData).subscribe({
+      next:(result:any)=>{
+        let base64Data = result.result;
+        let img = new Image();
+        img.src = base64Data;
+        img.onload = () => {
+          let canvas = document.createElement('canvas');
+          let ctx:any = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0,  canvas.width ,  canvas.height);
+          let modifiedBase64Data = canvas.toDataURL('image/png');
+          let link = document.createElement('a');
+          link.download = 'DataDownload.png';
+          link.href = modifiedBase64Data;
+          link.click();
+        this.spinner.hide();
+      }
+    }
+    })
+  }catch(error){
+    console.log("Error handle",error)
     this.spinner.hide();
-    }
-    }
-  );
+  }
   }
   public scrollSettings: ScrollSettingsModel = {scrollLimit:'Infinity',padding:{top:100,bottom:100,left:100,right:100}};
   // public pageSettings:PageSettingsModel ={
@@ -416,7 +304,7 @@ public diagramthing(){
   ExpandAll(){
     this.spinner.show();
     setTimeout(() =>{
-      this.diagram.nodes.forEach((x:any)=>{
+      this.diagram.nodes.filter((x:any)=>x.id != 'title').forEach((x:any)=>{
           x.isExpanded = true;
           this.CheckExpandStatus[x.id] = true;
       })
@@ -431,7 +319,7 @@ public diagramthing(){
     //this.diagram.nodes[0].isExpanded = false;
     this.spinner.show();
     setTimeout(() => {
-      this.sendItemToCallaps(this.diagram.nodes)
+      this.sendItemToCallaps(this.diagram.nodes.filter((x:any)=>x.id != 'title'))
       let levelSearch:any = this.levelSearch[0];
       this.listLevel = levelSearch.value;
     }, 500);
@@ -466,7 +354,7 @@ public diagramthing(){
             this.titleName = result.titleName;
             this.titleDesc = result.titleDesc;
             this.orgunit.data.forEach((x:any)=>{
-              let child = this.orgunit.data.filter((e:any)=> e.parentObjectID == x.objectID)
+              let child = this.orgunit.data.filter((e:any) => e.parentObjectID == x.objectID)
               x.totalImmSub = child.length ? child.length : 0;
             })
 
@@ -492,12 +380,24 @@ public diagramthing(){
               parentId: 'parentObjectID',
               dataSource:new DataManager(this.orgunit.data),
               doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram) => {
-                nodeModel.shape={
-                  type:'Basic'
-                }
+
               }
             }
-
+          //   this.nodes.push({
+          //     id:'title',
+          //     offsetX:600,
+          //     offsetY:-300,
+          //     annotations:[{
+          //       content:`${this.titleName} ${this.titleDesc}`,
+          //       style:{strokeColor:'none',color:'black',fontSize:90,textWrapping:'NoWrap'}
+          //     }],
+          //     excludeFromLayout:true,
+          //     height:200,
+          //     width:200,
+          //     constraints:  ~NodeConstraints.Shadow,
+          //     style:{ fill: 'white', strokeColor: 'none', color: 'white' },
+          //     visible:true,
+          // })
             this.topmenu.levelSearch = this.App.setRouting();
           },
           error:(err)=>{
@@ -509,50 +409,63 @@ public diagramthing(){
   }
 
 
-  public async SetDynamicNode(){
+  public SetDynamicNode(){
     let Height = Object.keys(this.ShowField).length * 40;
     if(this.orgunit.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data.objectType != 'UnitCode'){
           if(r.data.replacementPersonID == null){
             r.height = Height;
-            this.diagram.dataBind();
+            // this.diagram.dataBind();
           }
           else{
             r.height = Height * 1.8;
-            this.diagram.dataBind();
+            // this.diagram.dataBind();
           }
         }else if(r.data.objectType == 'UnitCode'){
           r.height = 200;
         }
       })
+      this.diagram.dataBind();
     }else{
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data.objectType != 'UnitCode'){
         if(r.data.replacementPersonID == null){
         r.height = this.orgunit.boxHeight;
-        this.diagram.dataBind();
+
         }else{
           r.height = this.orgunit.boxHeight * 1.8;
-          this.diagram.dataBind();
+          // this.diagram.dataBind();
         }
       }
       else if(r.data.objectType == 'UnitCode'){
         r.height = 200;
       }
       })
+      // this.diagram.dataBind();
     }
+    this.diagram.dataBind();
     if(this.orgunit.boxWidth == null){
       this.diagram.nodes.forEach((r:any) =>{
         r.width = 450;
-        this.diagram.dataBind();
+
       })
+      this.diagram.dataBind();
     }else{
       this.diagram.nodes.forEach((r:any) =>{
         r.width = this.orgunit.boxWidth;
-        this.diagram.dataBind();
+
       })
+      this.diagram.dataBind();
     }
-    return Promise.resolve();
+  }
+
+  showTitleNode(){
+    let nodetitle:any = this.diagram.nodes.find((x:any)=>x.id == 'title')
+    nodetitle.visible = true
+  }
+  hideTitleNode(){
+    let nodetitle:any = this.diagram.nodes.find((x:any)=>x.id == 'title')
+    nodetitle.visible = false
   }
 }

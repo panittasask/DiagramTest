@@ -38,27 +38,13 @@ export class AppComponent {
   public firstPage:boolean;
   public levelSearch:any=
   [
-  //  {
-  //   value:1,text:"Position Chart Minimal"
-  //  },
-  //  {
-  //   value:3,text:"Position Chart Color"
-  //  },
-  //  {
-  //   value:2,text:"Organization Unit Chart"
-  //  },
-  //  {
-  //   value:4,text:"Organization Unit and Position Chart"
-  //  }
+
   ];
 
   constructor(private router:Router,private http:HttpClient,private session:LocalStorageService,private currentPath:ActivatedRoute,private service:DiagramService,private webservice:WebserviceService
   ){
 
   }
-
-
-
 
   GetToken(){
     const url = `${this.gateway}/auth/Token`;
@@ -75,22 +61,10 @@ export class AppComponent {
       options
     )
   }
-
   public selectLevel(level:any):void{
     this.outlet.selectLevel(level);
   }
 
-  public ExpandAll(){
-    // this.minimal.ExpandAll();
-  }
-
-  public CollapsAll(){
-    // this.minimal.CollapsAll();
-  }
-
-  public ExportOptions(){
-
-  }
   public selectLayout(layout:any){
     this.firstPage = false;
     let param = window.sessionStorage.getItem('queryParam')
@@ -128,29 +102,29 @@ export class AppComponent {
     let model = this.webservice.model;
     if(model['positionid'] != null && this.router.url != '/'){
       this.levelSearch =   [
+        // {
+        //  value:1,text:"Position Chart Minimal"
+        // },
         {
-         value:1,text:"Position Chart Minimal"
+         value:3,text:"Position Chart "
         },
         {
-         value:3,text:"Position Chart Color"
-        },
-        {
-          value:3.1,text:"Position Chart Color + All Matrix"
+          value:3.1,text:"Position Chart + All Matrix"
          },
          {
-          value:3.2,text:"Position Chart Color + Matrix Only"
+          value:3.2,text:"Position Chart + Matrix Only"
          },
         {
           value:2,text:"Organization Unit Chart"
         },
         {
-          value:4,text:"Organization Unit and Position Chart"
+          value:4,text:"Organization and Position Chart"
          },
          {
-          value:4.1,text:"Organization Unit and Position Chart + All Matrix"
+          value:4.1,text:"Organization and Position Chart + All Matrix"
          },
          {
-          value:4.2,text:"Organization Unit and Position Chart + Matrix Only"
+          value:4.2,text:"Organization and Position Chart + Matrix Only"
          }
        ];
     }
@@ -166,13 +140,11 @@ export class AppComponent {
       // this.router.navigate(['/Unauthorize']);
     }
 
-    // this.topmenuComp.setRouingItem(this.levelSearch);
     return this.levelSearch;
   }
 
   ngOnInit():void{
     // window.sessionStorage.clear();
-
     let pathName:string;
     this.currentPath.queryParams.subscribe((params:any)=>{
       this.UrlParameter = params;
@@ -184,7 +156,6 @@ export class AppComponent {
           pathName = event.url.split('?')[0];
 
           this.currentPathName = pathName;
-          console.log("PathName",pathName)
 
           switch(pathName)
         {
@@ -197,27 +168,35 @@ export class AppComponent {
             break;
           }
           case '/PositionChart':{
-            this.listLevel = 'Position Chart Color';
+            this.listLevel = 'Position Chart ';
             break;
           }
           case '/OrganizationUnitAndPositionChart':{
-            this.listLevel = 'Organization Unit and Position Chart';
+            this.listLevel = 'Organization and Position Chart';
+            break;
+          }
+          case '/OrganizationUnitAndPositionChartAllMatrix':{
+            this.listLevel = 'Organization And PositionChart + All Matrix';
+            break;
+          }
+          case '/OrganizationUnitAndPositionChartMatrixOnly':{
+            this.listLevel = 'Organization And PositionChart + MatrixOnly';
             break;
           }
           case '/PositionChartAllMatrix':{
-            this.listLevel = 'PositionChart + All Matrix';
+            this.listLevel = 'Position Chart + All Matrix';
             break
           }
           case '/PositionChartMatrixOnly':{
-            this.listLevel = 'PositionChart + Matrix Only'
+            this.listLevel = 'Position Chart + Matrix Only'
             break;
           }
           case '/OrganizationUnitAndPositionChart All Matrix':{
-            this.listLevel = 'PositionChart + Matrix Only'
+            this.listLevel = 'Position Chart + Matrix Only'
             break;
           }
           case '/OrganizationUnitAndPositionChart Matrix Only':{
-            this.listLevel = 'PositionChart + Matrix Only'
+            this.listLevel = 'Position Chart + Matrix Only'
             break;
           }
         }
@@ -238,10 +217,8 @@ export class AppComponent {
       }
 
     })
-
-
-
-    this.GetToken().subscribe({
+    if(this.session.getItem('token') == null || this.session.getItem('token') == undefined){
+      this.GetToken().subscribe({
       next:(x:any)=>
     {
       this.session.saveToken(x.access_token)
@@ -253,6 +230,8 @@ export class AppComponent {
     },
     }
     );
+    }
+
 
   }
 

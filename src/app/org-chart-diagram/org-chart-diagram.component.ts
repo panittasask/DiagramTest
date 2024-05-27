@@ -9,6 +9,7 @@ import orgChartData from '../../model/Chart/OrgPosition.json';
 import { CheckValuePipe } from '../components/check-value.pipe';
 import { DiagramService } from '../services/diagram.service';
 import {NgSelectModule, NgOption} from '@ng-select/ng-select';
+import { HostListener } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { Component, ViewEncapsulation, ViewChild, ElementRef, ViewChildren, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, ɵɵtrustConstantResourceUrl, model, } from '@angular/core';
 
@@ -21,7 +22,8 @@ import {
   ScrollSettingsModel,
   PointModel,
   IFitOptions,
-  ConnectorBridgingService
+  ConnectorBridgingService,
+  OverviewComponent
 } from '@syncfusion/ej2-angular-diagrams';
 import {
   NodeModel,
@@ -97,12 +99,13 @@ import { addObjectToGrid } from '@syncfusion/ej2-diagrams/src/diagram/utility/sw
 import { ConnectableObservable, tap } from 'rxjs';
 import { debug, error } from 'console';
 import { request } from 'http';
-import { Margin } from '@syncfusion/ej2-angular-charts';
 import { btoa } from 'buffer';
 import { Buffer } from 'buffer';
 import { WebserviceService } from '../services/webservice.service';
 import { AppComponent } from '../app.component';
 import { ActivatedRoute, Router } from '@angular/router';
+import { title } from 'process';
+import { consumerPollProducersForChange, setThrowInvalidWriteToSignalError } from '@angular/core/primitives/signals';
 export interface EmployeeInfo {
   Role: string;
   color: string;
@@ -124,13 +127,17 @@ export interface MyObject {
   encapsulation: ViewEncapsulation.None,
 })
 export class OrgChartDiagramComponent implements OnInit{
+  @ViewChild('spinner',{static:true}) public spinner:any;
   @ViewChild('diagram')
   public diagram: DiagramComponent;
   @ViewChild('topmenu',{static:true}) public topmenu:any;
-  constructor(private router:ActivatedRoute,private AppComp:AppComponent,private http:HttpClient,private spinner:NgxSpinnerService,private cdr: ChangeDetectorRef,private diagramService:DiagramService,private webService:WebserviceService){
+  @ViewChild('overview',{static:true}) public overview:OverviewComponent;
+  public loading:string='Loading...';
+  constructor(private router:ActivatedRoute,private AppComp:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private diagramService:DiagramService,private webService:WebserviceService){
 
-
+    this.vm = this;
   }
+  public FirstLoad:boolean=true;
   public connectors: ConnectorModel;
   public customerData: any = dataCustomer;
   public ModelData: any = Data;
@@ -156,6 +163,7 @@ export class OrgChartDiagramComponent implements OnInit{
   public ExpandStatus:{[key:string]:boolean}={};
   public inDirect:boolean = false;
   public matrixposition:boolean =false;
+  public vm:any;
   public ShowField:{[key:string]:boolean}={};
   public Caption:any={
     n0:"",
@@ -178,7 +186,7 @@ padding:{left:100,right:100,top:100,bottom:100} };
     connectionDirection:'Auto',
     enableRouting:true,
     enableAnimation:true,
-    verticalSpacing: 200,
+    verticalSpacing: 120,
     horizontalSpacing: 90,
     connectionPointOrigin: ConnectionPointOrigin.SamePoint,
     getLayoutInfo: (node: Node, options: TreeInfo) => {
@@ -189,18 +197,21 @@ padding:{left:100,right:100,top:100,bottom:100} };
     },
   };
   public nodes :NodeModel[] = [
-    // {
-    //   id:'title',
-    //   offsetX:150,
-    //   offsetY:-400,
-    //   annotations:[{
-    //     content:`${this.titleName} ${this.titleDesc}`,
-    //     style:{strokeColor:'none',color:'black',fontSize:90,textWrapping:'NoWrap'}
-    //   }],
-    //   excludeFromLayout:true,ngo
-    //   height:200,
-    //   width:200,
-    // },
+    {
+      id:'title',
+      offsetX:600,
+      offsetY:-400,
+      annotations:[{
+        content:`${this.titleName} ${this.titleDesc}`,
+        style:{strokeColor:'none',color:'black',fontSize:90,textWrapping:'NoWrap'}
+      }],
+      excludeFromLayout:true,
+      height:200,
+      width:200,
+      constraints:  ~NodeConstraints.Shadow,
+      style:{ fill: 'white', strokeColor: 'none', color: 'white' },
+      visible:false,
+    },
     // {
     //   id:'descritpion',
     //   shape:{type:'HTML',content:
@@ -224,21 +235,27 @@ padding:{left:100,right:100,top:100,bottom:100} };
     // }
   ]
 
-  public nodeDefaults(obj: any,diagram:DiagramComponent): NodeModel {
+  public nodeDefaults(obj: any,diagram:DiagramComponent): any {
     // obj.constraints = ~(NodeConstraints.AllowMovingOutsideLane);
+
+
     if(obj.id == 'title'){
-      obj.height = 200;
-      obj.style = { fill: 'white', strokeColor: 'none', color: 'white' };
+         obj.height = 600;
+        obj.shape = { type: 'text' }
+    }else{
+        obj.height = 600;
+        obj.shape = {type :'HTML'}
     }
-    else if(obj.id == 'descritpion'){
-      obj.height = 200;
-      obj.style = { fill: 'white', strokeColor: 'none', color: 'white' };
-    }
-    else{
-      obj.shape = { type: 'HTML' };
-      obj.height = 500;
-      obj.width = 450;
-    }
+
+    // else if(obj.id == 'descritpion'){
+    //   obj.height = 200;
+    //   obj.style = { fill: 'white', strokeColor: 'none', color: 'white' };
+    // }
+    // else{
+
+
+      obj.width = 600;
+    // }
 
     return obj;
   }
@@ -265,15 +282,11 @@ padding:{left:100,right:100,top:100,bottom:100} };
   }
 
   public created(args:Object): void {
-
+    try{
     this.spinner.show();
-    // this.diagram.updateData();
-
     setTimeout(()=>{
-
-      let AllOffset = [...this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetY)]
-      let offsetX = [...this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetX)]
-      let xcd = this.findDuplicate(offsetX);
+      let filternode = this.diagram.nodes.filter((x:any)=>x.id !='title' && x.id !='descritpion').map((x:any)=>x.offsetY)
+      let AllOffset = [...filternode]
       let cd = this.findDuplicate(AllOffset);
       let arrObj:any=[];
       for(let i = 1 ;i < cd.length +1;i++){
@@ -290,33 +303,33 @@ padding:{left:100,right:100,top:100,bottom:100} };
 
         })
       }
-      xcd = xcd.sort();
-      for(let i=0;i<xcd.length;i++){
-          this.diagram.nodes.forEach((x:any)=>{
-            if(x.id != 'title' && x.id !='descritpion'){
-              if(xcd[i] == x.offsetX){
-                x.data.sideItem = i+1;
-              }
-            }
-        })
-      }
-      this.SetDynamicNode();
-      this.selectLevel({value:2});
-      // const titlenode:any = this.diagram.nodes.find((x:any)=> x.id == 'title');
-      // (titlenode as any).visible = false;
-      // (titlenode as any).height = 200;
-      // (titlenode as any).width = 1000;
-      // (titlenode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /2;
-      // const descriptionnode:any = this.diagram.nodes.find((x:any)=>x.id =='descritpion');
-      // (descriptionnode as any).visible = false;
-      // (descriptionnode as any).height = 200;
-      // (descriptionnode as any).width = 1000;
-      // (descriptionnode as any).offsetX = (this.diagram.scrollSettings.viewPortWidth? this.diagram.scrollSettings.viewPortWidth : 150) /0.5;
-      this.diagram.dataBind();
+
       this.topmenu.DiagramLevel = this.levelSearch;
-    },1000)
+      this.topmenu.listLevel = this.levelSearch.length;
+      this.selectLevel({value:this.levelSearch.length});
+
+      this.diagram.height = window.innerHeight-120;
+      this.diagram.dataBind();
+      let nodeTitle = this.nodes[0];
+      nodeTitle.offsetX = this.diagram.scrollSettings.viewPortWidth ? this.diagram.scrollSettings.viewPortWidth / 2 : window.innerWidth/2;
+      this.diagram.add(nodeTitle);
+      this.SetDynamicNode().then(response =>{
+        if(response){
+          this.CenterNode();
+        }
+      });
+      setTimeout(() => {
+        this.FirstLoad = false;
+        this.spinner.hide();
+      }, 3000);
 
 
+
+    },2000)
+
+    }catch(err){
+      console.log("Error",err)
+    }
 
   }
 
@@ -333,50 +346,55 @@ padding:{left:100,right:100,top:100,bottom:100} };
   }
 
   public ChangeMatrix(martrixId:string){
+    if(this.FirstLoad==false)
     this.spinner.show();
-    this.diagramService.loadDataWithMatrix(martrixId).subscribe({
+
+    setTimeout(() => {
+      this.diagramService.loadDataWithMatrix(martrixId).subscribe({
       next:(result:any)=>{
-        this.data = {
-          id: 'positionID',
-          parentId: 'reportToPositionID',
-          dataSource:new DataManager(result.data),
-          doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
-          }
-        }
-        this.diagram.dataBind();
-        this.diagram.clear();
+        this.diagram.dataSourceSettings.dataSource = new DataManager(result.data)
+        // this.data = result.data;
+        // this.diagram.dataBind();
+        // this.diagram.updateData();
         this.diagram.refresh();
-        setTimeout(() => {
-          this.spinner.hide();
-        }, 2000);
+
+        // this.diagram.clear();
+        // this.diagram.refresh();
+        this.created(Object);
+
 
       }
     });
+    }, 500);
+
   }
 
-  public selectLevel(args:any,isCreated:boolean = false){
-    this.spinner.show();
+  public selectLevel(args:any){
+    if(this.FirstLoad == false){
+      this.spinner.show();
+    }
+
 
     setTimeout(()=>{
-
       if(args != null){
         this.diagram.nodes.forEach((x:any)=>{
           if(x.id != 'title' && x.id != 'descritpion'){
             if(x.data.levelItem < args.value){
+              this.ExpandStatus[x.id]=x.isExpanded;
               x.isExpanded = true;
-
             }else{
+              this.ExpandStatus[x.id]=x.isExpanded;
               x.isExpanded = false;
             }
-            this.diagram.dataBind();
           }
-          this.ExpandStatus[x.id]=x.isExpanded;
+            this.diagram.dataBind();
         })
       }
-
-      this.spinner.hide();
-    },500)
-
+      this.CenterNode();
+      if(this.FirstLoad ==false){
+        this.spinner.hide();
+      }
+    },0)
   }
 
   public findDuplicate(data:any){
@@ -402,12 +420,28 @@ padding:{left:100,right:100,top:100,bottom:100} };
 
   }
 
-  public ExportOptions(){
-    this.spinner.show();
+  public CenterNode(){
+    let nodePosition:any = this.diagram.nodes.filter((x:any)=>x.id != 'title');
+    this.diagram.bringToCenter(nodePosition[0] ? nodePosition[0].wrapper.bounds : new Rect(0,0));
+  }
+
+  showTitleNode(){
+    let titlenode:any =this.diagram.nodes.find((x:any)=> x.id == 'title')
+    titlenode.visible = true;
+    titlenode.width = this.diagram.scrollSettings.viewPortWidth ? this.diagram.scrollSettings.viewPortWidth * 2 : titlenode.width * 2;
+  }
+  hideTitleNode(){
+    let titlenode:any =this.diagram.nodes.find((x:any)=> x.id == 'title')
+    titlenode.visible = false;
+  }
+   ExportOptions(){
+    this.spinner.show('Export in progress...');
+    this.showTitleNode();
     let css = document.styleSheets;
     let diagramData = this.diagram.getDiagramContent(css);
-              this.diagramService.ExportDiagram(diagramData).subscribe({
-                next:(result)=>{
+    this.hideTitleNode();
+       this.diagramService.ExportDiagram(diagramData).subscribe({
+                next:(result:any)=>{
                   let base64Data = result.result;
                   let img = new Image();
                   img.src = base64Data;
@@ -425,14 +459,16 @@ padding:{left:100,right:100,top:100,bottom:100} };
 
                   }
                 },
-                error:(err)=>{
+                error:(err:any)=>{
                   console.log("Error>",err)
                   this.spinner.hide();
                 },
                 complete:()=>{
                   this.spinner.hide();
+
                 }
               })
+
   }
   // public ExportOptions(){
   //   this.spinner.show();
@@ -506,6 +542,7 @@ padding:{left:100,right:100,top:100,bottom:100} };
       });
       this.listLevel = this.levelSearch[this.levelSearch.length-1].value;
       this.spinner.hide();
+      this.CenterNode();
     },500)
   }
 
@@ -522,6 +559,7 @@ padding:{left:100,right:100,top:100,bottom:100} };
       })
       this.listLevel = this.levelSearch[0].value;
       this.spinner.hide();
+      this.CenterNode();
     },500)
   }
 
@@ -529,16 +567,16 @@ padding:{left:100,right:100,top:100,bottom:100} };
   async ngOnInit(){
     this.spinner.show();
     let setSeatch = await this.webService.setMatrixView();
-    console.log("setSearch",setSeatch)
     this.topmenu.setMatrixSearch(setSeatch);
     await this.diagramService.setMatrixGroupId();
     this.webService.decodeUrl().then(response =>{
     if(response){
     this.diagramService.getPositionChart().subscribe({
+      // this.diagramService.getOrganizationUnitAndPositionChart().subscribe({
       next:(result:any)=>{
         let matrixDropdown=[];
         matrixDropdown.push({'itemID':"All",'itemName':'All'})
-        result.enumMatrixPositionGroup.forEach((x:any)=>{
+        result.enumMatrixPositionGroup?.forEach((x:any)=>{
           matrixDropdown.push(x)
         })
 
@@ -558,7 +596,6 @@ padding:{left:100,right:100,top:100,bottom:100} };
         let matrix = this.orgChartData.data.filter((x:any)=>x.objectType?.toUpperCase() == mat.toUpperCase());
         if(matrix.length > 0)
           this.matrixposition = true;
-
         this.data = {
           id: 'positionID',
           parentId: 'reportToPositionID',
@@ -566,16 +603,10 @@ padding:{left:100,right:100,top:100,bottom:100} };
           doBinding: (nodeModel: NodeModel, item: any, diagram: Diagram,options:TreeInfo) => {
           }
         }
-
-        // this.topmenu.MatrixSearch = (result.enumMatrixPositionGroup);
         this.topmenu.MatrixSearch = matrixDropdown
         this.topmenu.levelSearch = this.AppComp.setRouting();
-
-
-
-
       },
-      error:(err)=>{
+      error:(err:any)=>{
         console.log("Error >>>",err)
       },
       complete:()=>{
@@ -589,40 +620,39 @@ padding:{left:100,right:100,top:100,bottom:100} };
   }
 
   public SetDynamicNode(){
-    // var AllDisplay = this.isShow.filter((x:any) => x.visible == true);
-    var Height = Object.keys(this.ShowField).length * 35;
+    return new Promise((resolve,reject) =>{
+    let Height = Object.keys(this.ShowField).length * 35;
     if(this.orgChartData.boxHeight == null){
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data?.replacementPersonID == null){
           r.height = Height;
-          this.diagram.dataBind();
         }
         else{
           r.height = Height * 2;
-          this.diagram.dataBind();
         }
       })
+
     }else{
       this.diagram.nodes.forEach((r:any) =>{
         if(r.data?.replacementPersonID == null){
         r.height = this.orgChartData.boxHeight;
-        this.diagram.dataBind();
         }else{
           r.height = this.orgChartData.boxHeight * 2;
-          this.diagram.dataBind();
         }
       })
     }
     if(this.orgChartData.boxWidth == null){
       this.diagram.nodes.forEach((r:any) =>{
         r.width = 450;
-        this.diagram.dataBind();
       })
     }else{
       this.diagram.nodes.forEach((r:any) =>{
         r.width = this.orgChartData.boxWidth;
-        this.diagram.dataBind();
       })
     }
+    setTimeout(() => {
+      resolve(true);
+    }, 2000);
+    })
   }
 }

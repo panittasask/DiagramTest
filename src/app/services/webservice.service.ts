@@ -7,6 +7,8 @@ import { rejects } from 'assert';
 import { LocalStorageService } from './local-storage.service';
 import { AppComponent } from '../app.component';
 import { TopmenuComponent } from '../components/topmenu/topmenu.component';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { GlobalComponents } from '../global-components';
 
 
 @Injectable({
@@ -18,9 +20,6 @@ export class WebserviceService {
   public menu:[]=[];
   constructor(private router:Router,private activeRoute:ActivatedRoute,private storage:LocalStorageService) { }
 
-  logIn(){
-
-  }
   decodeUrl(){
     let routerUrl = this.router.url;
 
@@ -28,15 +27,12 @@ export class WebserviceService {
           if(routerUrl !=  ('/')){
           let replaceURL = this.authorizeUrl(routerUrl);
           let paramterValue = replaceURL.split('q=');
-          let url = this.storage.getItem('queryParam')
           if(!this.storage.getItem('queryParam'))
           {
-              console.log("infuntion",paramterValue)
               this.storage.setItem('queryParam',paramterValue[1])
           }
 
 
-          console.log("URLEXITS",this.storage.getItem('queryParam'))
           let content = paramterValue[1].split('&R=');
           let enCodeString = Buffer.from(content[0],'base64').toString('utf-8')
           let endCodeSymbol = enCodeString.split('&end');
@@ -47,11 +43,10 @@ export class WebserviceService {
   }
   setMatrixView(){
     return new Promise((resolve,rejects)=>{
-      this.activeRoute.queryParams.subscribe(response=>{
+      this.activeRoute.queryParams.subscribe((response:any)=>{
         let ShowMatrixSearch = response['s']
         let searchValue = ShowMatrixSearch == 'true' ? true:false;
-        resolve(true);
-        return searchValue;
+        resolve(searchValue);
       })
     })
   }
@@ -74,6 +69,7 @@ createModel(decodeData:any){
   })
   this.storage.setItem('reporttype',this.model['reporttype'])
 }
+
 
 
 }

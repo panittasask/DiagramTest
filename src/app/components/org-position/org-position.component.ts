@@ -26,6 +26,7 @@ Diagram.Inject(
 })
 
 export class OrgPositionComponent {
+  @ViewChild('spinner',{static:true}) public spinner:any;
   @ViewChild('diagram') public diagram:DiagramComponent;
   @ViewChild('nodeTemplate') public node:any;
   @ViewChild('topmenu') public topmenu:any;
@@ -49,7 +50,7 @@ export class OrgPositionComponent {
   }
 
 
-  constructor(private activeRoute:ActivatedRoute,private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private spinner:NgxSpinnerService,private service:DiagramService,private WebService:WebserviceService){}
+  constructor(private activeRoute:ActivatedRoute,private App:AppComponent,private http:HttpClient,private cdr: ChangeDetectorRef,private service:DiagramService,private WebService:WebserviceService){}
 
   public data:Object = {
 
@@ -137,13 +138,22 @@ export class OrgPositionComponent {
           }
         })
       }
-      this.selectLevel({value:2});
+      this.selectLevel({value:this.levelSearch.length});
+      this.diagram.height = window.innerHeight-120;
       setTimeout(() => {
       this.topmenu.DiagramLevel = this.levelSearch;
+      this.topmenu.listLevel = this.levelSearch.length;
       }, 1000);
     },1000)
 
   }
+
+
+  CenterNode(){
+    let firstNode:any = this.diagram.nodes[0];
+    this.diagram.bringToCenter(firstNode?.wrapper.bounds);
+  }
+
   ngOnInit(){
     this.spinner.show();
     this.WebService.decodeUrl().then(response =>{
@@ -207,6 +217,7 @@ this.service.getOrganizationUnitChart().subscribe({
       })
       this.listLevel = this.levelSearch.length;
       this.spinner.hide();
+      this.CenterNode();
     },500)
   }
   public CollapseAll(){
@@ -218,6 +229,7 @@ this.service.getOrganizationUnitChart().subscribe({
       })
       this.listLevel = this.levelSearch[0].value;
       this.spinner.hide();
+      this.CenterNode();
     },500)
   }
 
@@ -240,41 +252,42 @@ this.service.getOrganizationUnitChart().subscribe({
         this.diagram.dataBind();
       })
     }
+    this.CenterNode();
     this.spinner.hide();
     },500)
 
   }
   public Export(){
-    this.spinner.show();
+    this.spinner.show('Export in progress...');
     let htmlData = this.diagram.getDiagramContent();
-  const url = 'https://localhost:44301/home/generatedocument';
-  const headers = new HttpHeaders({
-    'Content-Type': 'application/json'
-  });
-  const options = { headers: headers };
-  const requestData = JSON.stringify({ Options: htmlData });
-
-  this.http.post(url, requestData, options)
-    .subscribe((result:any) => {
-      var base64Data = result.result;
-      var img = new Image();
+    this.service.ExportDiagram(htmlData).subscribe({
+      next:(result:any)=>{
+      let base64Data = result.result;
+      let img = new Image();
       img.src = base64Data;
       img.onload = () => {
-        var canvas = document.createElement('canvas');
-        var ctx:any = canvas.getContext('2d');
+      let canvas = document.createElement('canvas');
+      let ctx:any = canvas.getContext('2d');
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0, img.width, img.height);
-        var modifiedBase64Data = canvas.toDataURL('image/png');
-        var link = document.createElement('a');
-        link.download = 'diagram.png';
-        link.href = modifiedBase64Data;
-        link.click();
-        this.spinner.hide();
-      };
-    }, (error) => {
-      console.log('error', error);
-    });
+      let modifiedBase64Data = canvas.toDataURL('image/png');
+      let link = document.createElement('a');
+      link.download = 'diagram.png';
+      link.href = modifiedBase64Data;
+      link.click();
+      this.spinner.hide();
+      }
+    },
+    error:(err:any)=>{
+      console.log("Error >>>",err)
+      this.spinner.hide();
+    },
+    complete:()=>{
+      this.spinner.hide();
+    }
+
+  })
 }
 
 

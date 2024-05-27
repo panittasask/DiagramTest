@@ -10,14 +10,11 @@ export class LocalStorageService {
   constructor() { }
 
   setItem(key:string,value:string):void{
-    localStorage.setItem(key,value);
+    window.sessionStorage.setItem(key,value);
   }
 
   getItem(key:string){
-    return localStorage.getItem(key)
-  }
-  getAllItem(){
-    return 'Service Is Fine!';
+    return window.sessionStorage.getItem(key)
   }
 
   removeItem(key:string,value:string):void{
@@ -29,6 +26,6 @@ export class LocalStorageService {
   }
 
   clear():void{
-    localStorage.clear();
+    window.sessionStorage.clear();
   }
 }

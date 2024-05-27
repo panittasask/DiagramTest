@@ -4,7 +4,9 @@
 /* @import url('/fusiondiagram/src/fontawesome-pro-6.5.2-web/css/all.css'); */
 /* @import "../fontawesome-pro-6.5.2-web/css/fontawesome.min.css"; */
 
-@import "../../node_modules/@syncfusion/ej2-diagrams/styles/material.css";
+/* @import '../fontawesome-pro-6.5.2-web/css/all.css'; */
+
+/* @import "../../node_modules/@syncfusion/ej2-diagrams/styles/material.css"; */
 
 body{
     font-family:  "Poppins","Notosans" !important;

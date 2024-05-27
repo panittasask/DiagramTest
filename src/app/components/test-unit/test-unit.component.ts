@@ -130,6 +130,7 @@ export class TestUnitComponent {
       this.SetDynamicNode();
       this.diagram.dataBind();
     this.selectLevel({value:2})
+    this.diagram.height = window.innerHeight-120;
     this.diagram.dataBind();
     this.topmenu.DiagramLevel = this.levelSearch;
     }, 1000);

@@ -1,19 +1,24 @@
 <div class="topnav" >
   <div class="float-left">
+    <div class="layoutSelect">
     <ng-select  [items]="levelSearch" bindLabel="text" placeholder="Select Layout" style="min-width: 400px;"
     [(ngModel)]="listPath" (change)="selectLayout(listPath)" [searchable]="true">
   </ng-select>
+</div>
+<div class="matrixPos" *ngIf="SearchMatrixPermission">
+  <label for="matrixPos-select" style="text-wrap: nowrap;">Matrix Search</label>
+  <ng-select id="matrixPos-select" [items]="MatrixSearch" bindLabel="itemName"  bindValue="itemID" placeholder="Select Matrix" [(ngModel)]="matrixvalue" style="min-width: 150px;"
+      (change)="selectMatrix(matrixvalue)" [searchable]="true">
+  </ng-select>
+</div>
   </div>
   <div class="float-right">
-    <div class="matrixPos" *ngIf="SearchMatrixPermission">
-      <label for="matrixPos-select" style="text-wrap: nowrap;">Matrix Search</label>
-      <ng-select id="matrixPos-select" [items]="MatrixSearch" bindLabel="itemName"  bindValue="itemID" placeholder="Select Matrix" [(ngModel)]="matrixvalue" style="min-width: 200px;"
-          (change)="selectMatrix(matrixvalue)" [searchable]="true">
-      </ng-select>
-    </div>
+    <!-- <div class="clearsession">
+      <input type="button" class="btn btn-outline-danger" (click)="cleartoken()" value="Clear">
+    </div> -->
     <div class="selectLevel" >
       <label for="level-select" style="text-wrap: nowrap;">Display Level</label>
-      <ng-select id="level-select" [items]="DiagramLevel"  bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel" style="min-width: 150px;"
+      <ng-select id="level-select" [items]="DiagramLevel"  bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel" style="min-width: 90px;"
           (change)="selectLevel(listLevel)" [searchable]="true">
       </ng-select>
     </div>

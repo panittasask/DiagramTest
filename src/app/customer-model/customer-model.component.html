@@ -1,23 +1,3 @@
-<!-- <div class="form-group col-sm-12"
-    style="top: 20px;justify-content: right;align-items: end;display: flex;flex-wrap: wrap;gap: 10px;"
-    >
-    <div class="col-sm-5"></div>
-    <div class="col-sm-3"  style="text-align: center;display: flex;gap: 10px;align-items: center;float: right;justify-content: flex-end;">
-      <label for="level-select" style="text-wrap: nowrap;">Display Level</label>
-      <ng-select id="level-select" [items]="levelSearch" bindLabel="value" placeholder="Select Level" [(ngModel)]="listLevel" style="width: 200px;"
-          (change)="selectLevel(listLevel)" [searchable]="true">
-      </ng-select>
-    </div>
-    <input  class="btn btn-outline-success col-sm-1" type="button" id="Expand All"
-            (click)="ExpandAll()" value="Expand All" />
-
-        <input  class="btn btn-outline-info col-sm-1" type="button" id="Collapse All"
-            (click)="CollapsAll()" value="Collapse All" />
-
-      <input  class="btn btn-outline-danger col-sm-1" type="button" id="export" value="Export"
-          (click)="ExportOptions()" />
-
-</div> -->
 <app-topmenu style="margin-bottom: 50px;" (SelectLevel)="selectLevel($event)" [listLevel]="listLevel" (Expand)="ExpandAll()" (Collapse)="CollapsAll()" (Export)="ExportOptions()"  #topmenu></app-topmenu>
 <div style="display: flex;background-color: #1464CC;border-radius: 10px 10px 0 0;justify-content: center; height: 56.4px; margin-top: 25px;align-items: center;text-align: center;vertical-align: center;">
   <span style="color: white;font-size: 20px;">{{titleName}} {{titleDesc}}</span>
@@ -35,9 +15,15 @@
   <div *ngIf="inDirect" class="text">Report to Indirect</div>
 </div>
 <div style="overflow: hidden;position: relative;">
-    <ejs-diagram #diagram id="diagram" width="100%" height="600px" [layout]="layout"
-        [getConnectorDefaults]="connDefaults" [getNodeDefaults]="nodeDefaults" [dataSourceSettings]="data"
-        [scrollSettings]="scrollSettings" (created)="created()" [snapSettings]="snapSettings" [tool]="tool" (wheel)="onWheel($event)"
+    <ejs-diagram #diagram id="diagram" width="100%" height="600px"
+        [layout]="layout"
+        [getConnectorDefaults]="connDefaults"
+        [getNodeDefaults]="nodeDefaults"
+        [dataSourceSettings]="data"
+        [scrollSettings]="scrollSettings" (created)="created()"
+        [snapSettings]="snapSettings"
+        [tool]="tool" (wheel)="onWheel($event)"
+
         >
         <ng-template #nodeTemplate let-data>
             <!-- {{findingDataVisible(data.data.positionID)}} -->
@@ -336,6 +322,7 @@
 <!-- </div> -->
 <!-- </div>
 </div> -->
-<ngx-spinner bdColor="rgba(51,51,51,0.8)" size="medium" color="#fff" type="ball-scale-multiple">
+<!-- <ngx-spinner bdColor="rgba(51,51,51,0.8)" size="medium" color="#fff" type="ball-scale-multiple">
     <p style="font-size: 20px; color: white;">Loading...</p>
-</ngx-spinner>
+</ngx-spinner> -->
+<spinner-loading #spinner></spinner-loading>

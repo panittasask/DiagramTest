@@ -26,7 +26,9 @@ export class TopmenuComponent {
   @Input() currentLevel=this.listLevel;
   matrixvalue:string='All';
   @Output() ChangeMatrix = new EventEmitter<string>();
-  constructor(private cdr:ChangeDetectorRef,public route:ActivatedRoute,private router:Router,private app:AppComponent,private localstorage:LocalStorageService,private WebService:WebserviceService){
+  constructor(private cdr:ChangeDetectorRef,public route:ActivatedRoute,private router:Router,private app:AppComponent,private localstorage:LocalStorageService,private WebService:WebserviceService
+,private localStorage:LocalStorageService
+ ){
     this.CurrentPath = route.snapshot.routeConfig?.path;
 
   }
@@ -35,50 +37,50 @@ export class TopmenuComponent {
     switch (layout.value){
       case 1:{
         this.router.navigate(['/PositionChartMinimal'],{
-          queryParams:{q:param},queryParamsHandling: 'merge'
+          queryParams:{q:param},
         });
         break;
       }
       case 2:{
         this.router.navigate(['/OrganizationUnitChart'],{
           queryParams:{q:param},
-          queryParamsHandling: 'merge'
+
         });
         break;
       }
       case 3:{
         this.router.navigate(['/PositionChart'],{
-          queryParams:{q:param,m:false,s:false},queryParamsHandling: 'merge'
+          queryParams:{q:param,m:false,s:false},
         });
         break;
       }
       case 3.1:{
         this.router.navigate(['/PositionChartAllMatrix'],{
-          queryParams:{q:param,m:true,s:false},queryParamsHandling: 'merge'
+          queryParams:{q:param,m:true,s:false},
         });
         break;
       }
       case 3.2:{
         this.router.navigate(['/PositionChartMatrixOnly'],{
-          queryParams:{q:param,m:true,s:true},queryParamsHandling: 'merge'
+          queryParams:{q:param,m:true,s:true},
         });
         break;
       }
       case 4:{
         this.router.navigate(['/OrganizationUnitAndPositionChart'],{
-          queryParams:{q:param},queryParamsHandling: 'merge'
+          queryParams:{q:param}
         });
         break;
       }
       case 4.1:{
         this.router.navigate(['/OrganizationUnitAndPositionChartAllMatrix'],{
-          queryParams:{q:param,m:true,s:false},queryParamsHandling: 'merge'
+          queryParams:{q:param,m:true,s:false}
         });
         break;
       }
       case 4.2:{
         this.router.navigate(['/OrganizationUnitAndPositionChartMatrixOnly'],{
-          queryParams:{q:param,m:true,s:true},queryParamsHandling: 'merge'
+          queryParams:{q:param,m:true,s:true}
         });
         break;
       }
@@ -88,16 +90,20 @@ export class TopmenuComponent {
     this.SearchMatrixPermission = !this.SearchMatrixPermission;
   }
   setMatrixSearch(set:any){
-    console.log("Set >>>",set)
     this.SearchMatrixPermission = set;
-    console.log("This Search >>>",this.SearchMatrixPermission)
   }
   selectMatrix(value:string){
     this.ChangeMatrix.emit(value);
-    console.log("Matrix Value",value)
   }
   selectLevel(level:any){
     this.SelectLevel.emit(level);
+  }
+  cleartoken(){
+    let token = window.sessionStorage.getItem('token')
+    window.sessionStorage.removeItem('token');
+    console.log("TokenBefore",token)
+    // window.sessionStorage.clear();
+
   }
   ExpandAll(){
     this.Expand.emit();
